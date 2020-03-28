@@ -1,6 +1,6 @@
 from app.models import BaseResponse
 
-from typing import List
+from typing import List, Optional
 from typing import Mapping
 
 from pydantic import BaseModel
@@ -10,19 +10,19 @@ class CityModel(BaseModel):
     """
     城市
     """
-    name: str  # 城市名称
-    code: str  # 城市code
+    name_ch: Optional[str] = ""  # 城市名称
+    name_en: Optional[str] = ""  # 城市英文名
+    code: Optional[str] = ""  # 城市code
 
 
 class InfectionDailyModel(BaseModel):
     """
     每日疫情数据信息
     """
-    diagnose: int  # 确诊数
-    cure: int  # 治愈数
-    death: int  # 死亡数
-    treatment: int  # 治疗数
-    weather: str = None  # 天气信息
+    diagnose: Optional[int] = 0  # 确诊数
+    cure: Optional[int] = 0  # 治愈数
+    death: Optional[int] = 0  # 死亡数
+    # weather: str = None  # 天气信息
 
 
 class InfectionCityModel(InfectionDailyModel, CityModel):
@@ -36,8 +36,9 @@ class CountryModel(BaseModel):
     """
     国家
     """
-    name: str  # 国家名称
-    code: str  # 国家code
+    name_ch: Optional[str] = ""  # 国家名称
+    name_en: Optional[str] = ""  # 英文名
+    code: Optional[str] = ""  # 国家code
     city: List[InfectionCityModel]  # 国家包含得城市信息（包含疫情数据）
 
 
@@ -45,9 +46,10 @@ class _CountryModel(BaseModel):
     """
     国家
     """
-    name: str  # 国家名称
-    code: str  # 国家code
-    city: List[CityModel]  # 国家包含得城市信息（不包含疫情数据）
+    name_ch: Optional[str] = ""  # 国家名称
+    name_en: Optional[str] = ""  # 英文名
+    code: Optional[str] = ""  # 国家code
+    city: Mapping[str, CityModel]  # 国家包含得城市信息（不包含疫情数据）
 
 
 class InfectionCountryModel(BaseModel):
@@ -61,8 +63,9 @@ class GlobalModel(BaseModel):
     """
     全球（大洲）疫情数据信息
     """
-    name: str  # 洲名称
-    code: str  # 洲code
+    name_ch: Optional[str] = ""  # 洲名称
+    name_en: Optional[str] = ""  # 英文名
+    code: Optional[str] = ""  # 洲code
     country: Mapping[str, CountryModel]  # 洲包含的国家信息
 
 
@@ -70,8 +73,9 @@ class _GlobalModel(BaseModel):
     """
     全球（大洲）疫情数据信息
     """
-    name: str  # 洲名称
-    code: str  # 洲code
+    name_ch: Optional[str] = ""  # 洲名称
+    name_en: Optional[str] = ""  # 英文名
+    code: Optional[str] = ""  # 洲 code
     country: Mapping[str, _CountryModel]  # 洲包含的国家信息(不包含疫情数据)
 
 
@@ -109,4 +113,4 @@ class InfectionCityInResponse(BaseResponse):
 
 
 class InfectionGlobalInResponse(BaseResponse):
-    data: InfectionGlobalModel
+    data: dict

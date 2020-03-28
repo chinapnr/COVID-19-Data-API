@@ -12,5 +12,5 @@ class TimeFilters(BaseModel):
     """
     时间区间过滤
     """
-    stime: str = Field("", min_length=8, max_length=8)
-    etime: str = Field("", min_length=8, max_length=8)
+    stime: str = Field("")
+    etime: str = Field("")

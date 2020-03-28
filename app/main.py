@@ -14,14 +14,8 @@ app.include_router(api_router, prefix=API_V1_STR)
 @app.middleware("http")
 async def db_session_middleware(request: Request, call_next):
     request.state.db = Session()
-    try:
-        response = await call_next(request)
-        request.state.db.commit()
-        return response
-    except Exception as _:
-        request.state.db.rollback()
-    finally:
-        request.state.db.close()
+    response = await call_next(request)
+    return response
 
 
 if __name__ == "__main__":
