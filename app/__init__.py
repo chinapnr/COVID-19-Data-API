@@ -7,12 +7,13 @@ from fishbase.fish_logger import set_log_stdout
 
 from app.api import api_router
 from app.config import config
-from app.config.config import API_V1_STR
+from app.config.config import VERSION
+from app.config.config import API_VERSION
 from app.db.session import Session
 from app.schemas.errors import http422_error_handler, http_error_handler, CustomException
 
-app = FastAPI(title=config.PROJECT_NAME)
-app.include_router(api_router, prefix=API_V1_STR)
+app = FastAPI(title=config.PROJECT_NAME, version=VERSION)
+app.include_router(api_router, prefix=API_VERSION)
 app.add_exception_handler(HTTPException, http_error_handler)
 app.add_exception_handler(RequestValidationError, http422_error_handler)
 
@@ -30,6 +31,5 @@ async def exception_handler(_: Request, exc: CustomException):
         status_code=exc.status_code,
         content=exc.to_dict()
     )
-
 
 set_log_stdout()
