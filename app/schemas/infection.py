@@ -32,6 +32,13 @@ class InfectionCityModel(InfectionDailyModel, CityModel):
     pass
 
 
+class InfectionCityGroupByDateModel(InfectionDailyModel, CityModel):
+    """
+    城市疫情数据信息
+    """
+    date: Optional[str] = ""  # 日期信息
+
+
 class CountryModel(BaseModel):
     """
     国家
@@ -57,6 +64,13 @@ class InfectionCountryModel(BaseModel):
     国家疫情数据信息
     """
     city: List[InfectionCityModel]  # 国家所包含得城市信息
+
+
+class InfectionCountryGroupByDateModel(BaseModel):
+    """
+    国家疫情数据信息
+    """
+    city: List[InfectionCityGroupByDateModel]
 
 
 class GlobalModel(BaseModel):
@@ -108,8 +122,16 @@ class InfectionCountryInResponse(BaseResponse):
     data: InfectionCountryModel
 
 
+class InfectionCountryDetailInResponse(BaseResponse):
+    data: InfectionCountryGroupByDateModel
+
+
 class InfectionCityInResponse(BaseResponse):
     data: InfectionCityModel
+
+
+class InfectionCityDetailInResponse(BaseResponse):
+    data: List[InfectionCityGroupByDateModel]
 
 
 class InfectionGlobalInResponse(BaseResponse):

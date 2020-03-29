@@ -71,18 +71,12 @@ class Covid19(Base):
     def infection_country_data(*, db: Session, country: str, stime: str, etime: str):
         try:
             result = db.query(
-                Covid19.country_en,
-                Covid19.country_ch,
-                Covid19.province_en,
-                Covid19.province_ch,
+                Covid19.country_en, Covid19.country_ch, Covid19.province_en, Covid19.province_ch,
                 func.max(Covid19.confirmed).label("sum_confirmed"),
                 func.max(Covid19.deaths).label("sum_deaths"),
                 func.max(Covid19.recovered).label("sum_recovered"),
             ).filter(
-                and_(
-                    Covid19.country_en==country,
-                    Covid19.update_date.between(stime, etime)
-                )
+                and_(Covid19.country_en == country, Covid19.update_date.between(stime, etime))
             ).group_by(Covid19.province_en).all()
             return result
         except Exception as _:
@@ -91,24 +85,45 @@ class Covid19(Base):
         finally:
             db.close()
 
+    @staticmethod
+    def infection_country_detail_data(*, db: Session, country: str, stime: str, etime: str):
+        try:
+            result = db.query(Covid19).filter(
+                and_(Covid19.country_en == country, Covid19.update_date.between(stime, etime))
+            ).group_by(Covid19.update_date).all()
+            return result
+        except Exception as _:
+            db.rollback()
+            raise
+        finally:
+            db.close()
 
     @staticmethod
     def infection_city_data(*, db: Session, city: str, stime: str, etime: str):
         try:
             result = db.query(
-                Covid19.country_en,
-                Covid19.country_ch,
-                Covid19.province_en,
-                Covid19.province_ch,
+                Covid19.country_en, Covid19.country_ch, Covid19.province_en, Covid19.province_ch,
                 func.max(Covid19.confirmed).label("sum_confirmed"),
                 func.max(Covid19.deaths).label("sum_deaths"),
                 func.max(Covid19.recovered).label("sum_recovered"),
             ).filter(
-                and_(
-                    Covid19.province_en == city,
-                    Covid19.update_date.between(stime, etime)
-                )
+                and_(Covid19.province_en == city, Covid19.update_date.between(stime, etime)
+                     )
             ).group_by(Covid19.province_en).all()
+            return result
+        except Exception as _:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    @staticmethod
+    def infection_city_detail_data(*, db: Session, city: str, stime: str, etime: str):
+        try:
+            result = db.query(Covid19).filter(
+                and_(Covid19.province_en == city, Covid19.update_date.between(stime, etime)
+                     )
+            ).group_by(Covid19.update_date).all()
             return result
         except Exception as _:
             db.rollback()
