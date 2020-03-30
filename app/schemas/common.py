@@ -1,5 +1,6 @@
 from fastapi import Query
 
+from app.schemas.authentication import EmailFilters
 from app.schemas.filters import AreaFilters, TimeFilters
 
 
@@ -37,4 +38,15 @@ def get_time_filters(
     return TimeFilters(
         stime=stime,
         etime=etime
+    )
+
+
+def get_email_filters(email: str = Query("", alias="email"), ) -> EmailFilters:
+    """
+    获取传递的邮箱信息
+    :param email:
+    :return:
+    """
+    return EmailFilters(
+        email=email,
     )

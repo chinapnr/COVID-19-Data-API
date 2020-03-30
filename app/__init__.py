@@ -32,4 +32,5 @@ async def exception_handler(_: Request, exc: CustomException):
         content=exc.to_dict()
     )
 
+
 set_log_stdout()

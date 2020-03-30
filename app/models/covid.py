@@ -72,9 +72,9 @@ class Covid19(Base):
         try:
             result = db.query(
                 Covid19.country_en, Covid19.country_ch, Covid19.province_en, Covid19.province_ch,
-                func.max(Covid19.confirmed).label("sum_confirmed"),
-                func.max(Covid19.deaths).label("sum_deaths"),
-                func.max(Covid19.recovered).label("sum_recovered"),
+                func.sum(Covid19.confirmed).label("sum_confirmed"),
+                func.sum(Covid19.deaths).label("sum_deaths"),
+                func.sum(Covid19.recovered).label("sum_recovered"),
             ).filter(
                 and_(Covid19.country_en == country, Covid19.update_date.between(stime, etime))
             ).group_by(Covid19.province_en).all()
@@ -103,9 +103,9 @@ class Covid19(Base):
         try:
             result = db.query(
                 Covid19.country_en, Covid19.country_ch, Covid19.province_en, Covid19.province_ch,
-                func.max(Covid19.confirmed).label("sum_confirmed"),
-                func.max(Covid19.deaths).label("sum_deaths"),
-                func.max(Covid19.recovered).label("sum_recovered"),
+                func.sum(Covid19.confirmed).label("sum_confirmed"),
+                func.sum(Covid19.deaths).label("sum_deaths"),
+                func.sum(Covid19.recovered).label("sum_recovered"),
             ).filter(
                 and_(Covid19.province_en == city, Covid19.update_date.between(stime, etime)
                      )
