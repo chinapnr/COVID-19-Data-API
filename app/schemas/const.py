@@ -11,5 +11,5 @@ ERR_MSG = {
     VALIDATION_ERROR: "validation error",
     HTTP_ERROR: "http error",
     HTTP_FORBIDDEN: "requires authentication token",
-    EMAIL_ERROR: "email error"
+    EMAIL_ERROR: "email error: {error}"
 }

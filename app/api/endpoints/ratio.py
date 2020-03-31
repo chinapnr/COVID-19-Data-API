@@ -18,11 +18,9 @@ async def ratio_gender(
         time_filters: TimeFilters = Depends(get_time_filters), ) -> GenderRatioInResponse:
     """
     查询男女比例信息<br/>
-    :param area_filters: 区域过滤条件<br/>
-    :param time_filters: 时间过滤条件<br/>
-    :return:
     """
     all_data = Covid19.get_all(db)
+    print(all_data)
     return GenderRatioInResponse()
 
 
@@ -33,9 +31,6 @@ async def ratio_age(
         time_filters: TimeFilters = Depends(get_time_filters), ) -> AgeRatioInResponse:
     """
     查询年龄比例<br/>
-    :param area_filters: 区域过滤条件<br/>
-    :param time_filters: 时间过滤条件<br/>
-    :return:
     """
     print(area_filters, time_filters)
     return AgeRatioInResponse()
@@ -47,9 +42,6 @@ async def ratio_sars(
         time_filters: TimeFilters = Depends(get_time_filters), ) -> SarsNcovRatioInResponse:
     """
     查询 ncov 和 sars 的比例<br/>
-    :param area_filters: 区域过滤条件<br/>
-    :param time_filters: 时间过滤条件<br/>
-    :return:
     """
     print(area_filters, time_filters)
     return SarsNcovRatioInResponse()
@@ -61,9 +53,6 @@ async def ratio_rehabilitation(
         time_filters: TimeFilters = Depends(get_time_filters), ) -> RehabilitationRatioResponse:
     """
     查询治愈和死亡的比例<br/>
-    :param area_filters: 区域过滤条件<br/>
-    :param time_filters: 时间过滤条件<br/>
-    :return:
     """
     print(area_filters, time_filters)
     return RehabilitationRatioResponse()

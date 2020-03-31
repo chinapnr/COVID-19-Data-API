@@ -47,3 +47,14 @@ class COVID_USER(Base):
             raise
         finally:
             db.close()
+
+    @staticmethod
+    def get_all_user(*, db):
+        try:
+            result = db.query(COVID_USER).filter_by(**{}).all()
+            return result
+        except Exception as _:
+            db.rollback()
+            raise
+        finally:
+            db.close()

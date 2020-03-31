@@ -5,12 +5,14 @@ from starlette.exceptions import HTTPException
 from starlette.responses import JSONResponse
 from fishbase.fish_logger import set_log_stdout
 
-from app.api import api_router
 from app.config import config
-from app.config.config import VERSION
-from app.config.config import API_VERSION
+from app.api import api_router
 from app.db.session import Session
+from app.config.config import VERSION
+from app.models.user import COVID_USER
+from app.config.config import API_VERSION
 from app.schemas.errors import http422_error_handler, http_error_handler, CustomException
+from app.utils.bloom import BloomFilterUtils
 
 app = FastAPI(title=config.PROJECT_NAME, version=VERSION)
 app.include_router(api_router, prefix=API_VERSION)
@@ -33,4 +35,12 @@ async def exception_handler(_: Request, exc: CustomException):
     )
 
 
+bloom_filter = BloomFilterUtils()
+def init_bloom_filter():
+    all_user = COVID_USER.get_all_user(db=Session())
+    for _d in all_user:
+        bloom_filter.add(_d.email)
+
+
 set_log_stdout()
+init_bloom_filter()
