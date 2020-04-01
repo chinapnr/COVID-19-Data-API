@@ -42,6 +42,14 @@ MAIL_PORT = conf_info["mail_port"] or os.getenv("MAIL_PORT")
 SENDER = conf_info["sender"] or os.getenv("SENDER")
 SUBJECT = conf_info["subject"] or os.getenv("SUBJECT")
 
+# Redis 信息
+REDIS_CONFIG = {
+    "host": conf_info["redis_host"] or os.getenv("REDIS_HOST"),
+    "port": conf_info["redis_port"] or os.getenv("REDIS_PORT"),
+    "auth": conf_info["redis_auth"] or os.getenv("REDIS_AUTH"),
+    "db": conf_info["redis_db"] or os.getenv("REDIS_DB"),
+}
+
 # 加载本地配置文件
 try:
     from .local_config import *

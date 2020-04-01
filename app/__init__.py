@@ -16,8 +16,8 @@ from app.utils.bloom import BloomFilterUtils
 
 app = FastAPI(title=config.PROJECT_NAME, version=VERSION)
 app.include_router(api_router, prefix=API_VERSION)
-app.add_exception_handler(HTTPException, http_error_handler)
-app.add_exception_handler(RequestValidationError, http422_error_handler)
+# app.add_exception_handler(HTTPException, http_error_handler)
+# app.add_exception_handler(RequestValidationError, http422_error_handler)
 
 
 @app.middleware("http")

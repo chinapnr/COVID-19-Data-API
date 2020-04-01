@@ -3,6 +3,7 @@ aiomysql==0.0.20
 amqp==2.5.2
 asyncpg==0.20.1
 billiard==3.6.3.0
+bitarray==1.2.1
 cachetools==4.0.0
 celery==4.4.2
 certifi==2019.11.28
@@ -29,7 +30,9 @@ jwt==0.6.1
 kombu==4.6.8
 loguru==0.4.1
 lxml==4.5.0
+mmh3==2.5.1
 passlib==1.7.2
+Pillow==7.0.0
 premailer==3.6.1
 psycopg2==2.8.4
 pycparser==2.20
@@ -39,6 +42,7 @@ PyMySQL==0.9.2
 python-dateutil==2.8.1
 pytz==2019.3
 PyYAML==5.3.1
+redis==3.4.1
 requests==2.23.0
 six==1.14.0
 SQLAlchemy==1.3.15

@@ -4,6 +4,7 @@ VALIDATION_ERROR = "30012"
 HTTP_ERROR = "30013"
 HTTP_FORBIDDEN = "30014"
 EMAIL_ERROR = "30015"
+CAPTCHA_ERROR = "30017"
 
 ERR_MSG = {
     SUCCESS: "success",
@@ -11,5 +12,6 @@ ERR_MSG = {
     VALIDATION_ERROR: "validation error",
     HTTP_ERROR: "http error",
     HTTP_FORBIDDEN: "requires authentication token",
-    EMAIL_ERROR: "email error: {error}"
+    EMAIL_ERROR: "email error: {error}",
+    CAPTCHA_ERROR: "captcha error: {error}",
 }

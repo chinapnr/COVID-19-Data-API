@@ -34,9 +34,9 @@ class CustomException(Exception):
 
 def http422_error_handler(req, exc):
     logger.info(f"{req}: {exc}")
-    raise CustomException(VALIDATION_ERROR)
+    return CustomException(VALIDATION_ERROR)
 
 
 def http_error_handler(req, exc):
     logger.info(f"{req}: {exc}")
-    raise CustomException(HTTP_ERROR)
+    return CustomException(HTTP_ERROR)

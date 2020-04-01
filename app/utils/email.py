@@ -5,10 +5,10 @@ from fishbase.fish_logger import logger
 from app.utils.singleTon import Singleton
 from app.config.config import MAIL_HOST, MAIL_PASS, MAIL_USER, SUBJECT, SENDER, MAIL_PORT
 
+
 @Singleton
-class EmailUtils():
-    @staticmethod
-    def send_mail(msg, adds):
+class EmailUtils:
+    def send_mail(self, msg, adds):
         """
         发送邮件
         :param msg:
