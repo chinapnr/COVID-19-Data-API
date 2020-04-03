@@ -40,3 +40,6 @@ class Captcha(Base):
             raise
         finally:
             db.close()
+
+# 创建表
+# Base.metadata.create_all(engine)
