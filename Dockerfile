@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.7
 
 MAINTAINER David Yi <wingfish@gmail.com>
 
