@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends
+from fishbase.fish_logger import logger
 
 from app.db import get_db
 from app.schemas.ratio import *
@@ -19,6 +20,7 @@ async def ratio_gender(
     """
     查询男女比例信息<br/>
     """
+    logger.info(f"received parameters, time_filters:{time_filters}, area_filters:{area_filters}")
     all_data = Covid19.get_all(db)
     print(all_data)
     return GenderRatioInResponse()
@@ -26,7 +28,6 @@ async def ratio_gender(
 
 @router.get("/age", response_model=AgeRatioInResponse, name="ratio:age")
 async def ratio_age(
-        db: Session = Depends(get_db),
         area_filters: AreaFilters = Depends(get_area_filters),
         time_filters: TimeFilters = Depends(get_time_filters), ) -> AgeRatioInResponse:
     """

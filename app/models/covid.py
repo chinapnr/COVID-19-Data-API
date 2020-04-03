@@ -34,13 +34,12 @@ class Covid19(Base):
             db.close()
 
     @staticmethod
-    def infection_daily_data(*, db: Session, country: str, ):
+    def get_infection_daily_data(*, db: Session, country: str, ):
         try:
             result = db.query(Covid19).filter_by(
                 country_en=country,
                 update_date=datetime.date.today()
             ).group_by(Covid19.province_en).all()
-            db.commit()
             return result
         except Exception as _:
             db.rollback()
@@ -49,7 +48,7 @@ class Covid19(Base):
             db.close()
 
     @staticmethod
-    def infection_area_data(*, db: Session, stime: str, etime: str):
+    def get_infection_area_data(*, db: Session, stime: str, etime: str):
         try:
             result = db.query(
                 Covid19.continents_en,
@@ -69,7 +68,7 @@ class Covid19(Base):
             db.close()
 
     @staticmethod
-    def infection_country_data(*, db: Session, country: str, stime: str, etime: str):
+    def get_infection_country_data(*, db: Session, country: str, stime: str, etime: str):
         try:
             result = db.query(
                 Covid19.country_en, Covid19.country_ch, Covid19.province_en, Covid19.province_ch,
@@ -87,7 +86,7 @@ class Covid19(Base):
             db.close()
 
     @staticmethod
-    def infection_country_detail_data(*, db: Session, country: str, stime: str, etime: str):
+    def get_infection_country_detail_data(*, db: Session, country: str, stime: str, etime: str):
         try:
             result = db.query(Covid19).filter(
                 and_(Covid19.country_en == country, Covid19.update_date.between(stime, etime))
@@ -100,7 +99,7 @@ class Covid19(Base):
             db.close()
 
     @staticmethod
-    def infection_city_data(*, db: Session, city: str, stime: str, etime: str):
+    def get_infection_city_data(*, db: Session, city: str, stime: str, etime: str):
         try:
             result = db.query(
                 Covid19.country_en, Covid19.country_ch, Covid19.province_en, Covid19.province_ch,
@@ -119,12 +118,31 @@ class Covid19(Base):
             db.close()
 
     @staticmethod
-    def infection_city_detail_data(*, db: Session, city: str, stime: str, etime: str):
+    def get_infection_city_detail_data(*, db: Session, city: str, stime: str, etime: str):
         try:
             result = db.query(Covid19).filter(
                 and_(Covid19.province_en == city, Covid19.update_date.between(stime, etime)
                      )
             ).group_by(Covid19.update_date).all()
+            return result
+        except Exception as _:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+    @staticmethod
+    def get_infection_global_data(*, db: Session):
+        try:
+            result = db.query(
+                Covid19.country_en,
+                Covid19.country_ch,
+                func.sum(Covid19.confirmed_add).label("sum_confirmed"),
+                func.sum(Covid19.deaths_add).label("sum_deaths"),
+                func.sum(Covid19.recovered_add).label("sum_recovered"),
+            ).filter_by(
+                update_date=datetime.date.today()
+            ).group_by(Covid19.update_date, Covid19.country_en).all()
             return result
         except Exception as _:
             db.rollback()
