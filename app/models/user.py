@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 
 from app.db.session import Session

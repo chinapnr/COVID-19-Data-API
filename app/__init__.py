@@ -1,23 +1,22 @@
 from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
-from starlette import status
-
-from starlette.requests import Request
-from starlette.responses import JSONResponse
 from fishbase.fish_logger import set_log_stdout
 from fishbase.fish_random import gen_random_str
+from starlette import status
 from starlette.middleware.cors import CORSMiddleware
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
-from app.config import config
 from app.api import api_router
-from app.db.session import Session
-from app.config.config import VERSION
-from app.models.user import CovidUser
+from app.config import config
 from app.config.config import API_VERSION
-from app.utils.bloom import BloomFilterUtils
-from app.schemas.errors import CustomException
+from app.config.config import VERSION
+from app.db.session import Session
+from app.models.user import CovidUser
 from app.schemas.const import VALIDATION_ERROR, ERR_MSG
+from app.schemas.errors import CustomException
+from app.utils.bloom import BloomFilterUtils
 
 app = FastAPI(title=config.PROJECT_NAME, version=VERSION)
 app.include_router(api_router, prefix=API_VERSION)

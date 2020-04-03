@@ -1,16 +1,16 @@
-from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
-from fishbase.fish_logger import logger
-
-from app.db import get_db
-from app.schemas.infection import *
-from app.models.covid import Covid19
 from fastapi.security.api_key import APIKey
+from fishbase.fish_logger import logger
+from sqlalchemy.orm import Session
+
+from app.api.endpoints.authentication import get_api_key
+from app.db import get_db
+from app.models.covid import Covid19
+from app.schemas.common import get_area_filters, get_time_filters, get_city_filters
 from app.schemas.const import SYSTEM_ERROR
 from app.schemas.errors import CustomException
 from app.schemas.filters import AreaFilters, TimeFilters
-from app.api.endpoints.authentication import get_api_key
-from app.schemas.common import get_area_filters, get_time_filters, get_city_filters
+from app.schemas.infection import *
 
 router = APIRouter()
 

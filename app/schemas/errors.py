@@ -1,7 +1,7 @@
 from fishbase.fish_logger import logger
 from fishbase.fish_random import gen_random_str
 
-from .const import ERR_MSG, HTTP_ERROR, VALIDATION_ERROR
+from .const import ERR_MSG
 
 
 class CustomException(Exception):
@@ -18,7 +18,7 @@ class CustomException(Exception):
             self.msg_dict = None
         self.payload = payload
 
-    def to_dict(self, custom_response_id = None):
+    def to_dict(self, custom_response_id=None):
         rv = dict(self.payload or ())
         rv['code'] = self.return_code
         if self.msg_dict is not None:
@@ -27,7 +27,7 @@ class CustomException(Exception):
             s = ERR_MSG[self.return_code]
         rv['message'] = s
         if custom_response_id:
-            rv.update({'response_id':custom_response_id})
+            rv.update({'response_id': custom_response_id})
         else:
             rv.update({'response_id': gen_random_str(min_length=36, max_length=36, has_letter=True, has_digit=True)})
         s += ' [response_id:{}]'.format(rv['response_id'])

@@ -1,9 +1,9 @@
-from app.schemas import BaseResponse
-
 from typing import List, Optional
 from typing import Mapping
 
 from pydantic import BaseModel
+
+from app.schemas import BaseResponse
 
 
 class CityModel(BaseModel):
