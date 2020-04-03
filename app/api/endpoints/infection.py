@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends
 from fishbase.fish_logger import logger
 
-from app.db.utils import get_db
+from app.db import get_db
 from app.schemas.infection import *
 from app.models.covid import Covid19
 from fastapi.security.api_key import APIKey
@@ -22,7 +22,7 @@ async def infection_daily(
         area_filters: AreaFilters = Depends(get_area_filters)
 ) -> InfectionDailyInResponse:
     """
-    查询每日新增情况<br/>
+    根据国家查询每日新增情况<br/>
     :return:
     """
     logger.info(f"received parameters, token:{token}, area_filters:{area_filters}")
@@ -48,7 +48,7 @@ async def infection_area(
         time_filters: TimeFilters = Depends(get_time_filters)
 ) -> InfectionGlobalInResponse:
     """
-    查询发生过疫情的地区信息（包含洲，国家，地区的名称和code）<br/>
+    查询发生过疫情的地区信息（包含洲，国家，地区）<br/>
     :return:
     """
     logger.info(f"received parameters, token:{token}, time_filters:{time_filters}")
@@ -134,15 +134,21 @@ async def infection_country_detail(
     """
     logger.info(f"received parameters, token:{token}, area_filters:{area_filters}, time_filters: {time_filters}")
     try:
-        city_data = list()
+        city_data = dict()
         country_detail_data = Covid19.infection_country_detail_data(
             db=db, country=area_filters.name, stime=time_filters.stime, etime=time_filters.etime
         )
         for _d in country_detail_data:
-            city_data.append(InfectionCityGroupByDateModel(
-                diagnose=_d.confirmed, cure=_d.recovered, death=_d.deaths, date=str(_d.update_date),
+            current_city_group_date_model = InfectionCityGroupByDateModel(
+                diagnose=_d.confirmed_add, cure=_d.recovered_add, death=_d.deaths_add, date=str(_d.update_date),
                 name_ch=_d.province_ch, name_en=_d.province_en, code=_d.province_en)
-            )
+            # 添加到 city_data 中
+            if city_data.get(_d.province_en):
+                city_data[_d.province_en].append(
+                    current_city_group_date_model
+                )
+            else:
+                city_data[_d.province_en] = [current_city_group_date_model]
     except Exception as e:
         logger.error(f"{SYSTEM_ERROR}: {e}")
         raise CustomException(SYSTEM_ERROR)
@@ -161,7 +167,7 @@ async def infection_city(
         city_filters: AreaFilters = Depends(get_city_filters),
         time_filters: TimeFilters = Depends(get_time_filters), ) -> InfectionCityInResponse:
     """
-    根据国家查询每个城市一段时间内的汇总数据信息（包含 确诊，治愈，死亡，治疗）<br/>
+    根据国家查询每个城市一段时间内的汇总数据信息（包含 确诊，治愈，死亡）<br/>
     :return:
     """
     logger.info(f"received parameters, token:{token}, city_filters:{city_filters}, time_filters: {time_filters}")
@@ -192,7 +198,7 @@ async def infection_city_detail(
         city_filters: AreaFilters = Depends(get_city_filters),
         time_filters: TimeFilters = Depends(get_time_filters), ) -> InfectionCityDetailInResponse:
     """
-    根据国家查询每个城市一段时间内的明细数据信息（包含 确诊，治愈，死亡，治疗）<br/>
+    根据国家查询每个城市一段时间内的明细数据信息（包含 确诊，治愈，死亡）<br/>
     :return:
     """
     logger.info(f"received parameters, token:{token}, city_filters:{city_filters}, time_filters: {time_filters}")
@@ -204,9 +210,9 @@ async def infection_city_detail(
         if city_detail_data:
             for _d in city_detail_data:
                 city_detail.append(InfectionCityGroupByDateModel(
-                    diagnose=_d.confirmed,
-                    cure=_d.recovered,
-                    death=_d.deaths,
+                    diagnose=_d.confirmed_add,
+                    cure=_d.recovered_add,
+                    death=_d.deaths_add,
                     name_ch=_d.province_ch,
                     name_en=_d.province_en,
                     code=_d.province_en,

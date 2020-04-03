@@ -1,4 +1,4 @@
-from app.models import BaseResponse
+from app.schemas import BaseResponse
 
 from typing import List, Optional
 from typing import Mapping
@@ -70,7 +70,7 @@ class InfectionCountryGroupByDateModel(BaseModel):
     """
     国家疫情数据信息
     """
-    city: List[InfectionCityGroupByDateModel]
+    city: Mapping[str, List[InfectionCityGroupByDateModel]]
 
 
 class GlobalModel(BaseModel):

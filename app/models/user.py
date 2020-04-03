@@ -2,10 +2,11 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 
 from app.db.session import Session
-from app.models.base import Base
+from app.models import Base
 
 
-class COVID_USER(Base):
+class CovidUser(Base):
+    __tablename__ = 'covid_user'
     id = Column(Integer, autoincrement=True, primary_key=True, comment="主键")
     create_time = Column(DateTime, default=datetime.now, nullable=False, comment="创建时间")
     update_time = Column(DateTime, default=datetime.now, nullable=False, comment="修改时间")
@@ -16,7 +17,7 @@ class COVID_USER(Base):
     @staticmethod
     def add_user(*, db: Session, email: str, token: str):
         try:
-            new_user = COVID_USER(email=email, token=token)
+            new_user = CovidUser(email=email, token=token)
             db.add(new_user)
             db.commit()
         except Exception as _:
@@ -28,7 +29,7 @@ class COVID_USER(Base):
     @staticmethod
     def update_user(*, db: Session, condition: dict, data: dict):
         try:
-            result = Session.query(COVID_USER).filter_by(**condition).update(data)
+            result = Session.query(CovidUser).filter_by(**condition).update(data)
             db.commit()
             return result
         except Exception as _:
@@ -38,9 +39,9 @@ class COVID_USER(Base):
             db.close()
 
     @staticmethod
-    def get_user(*, db: Session, token: str):
+    def get_user(*, db: Session, condition: dict):
         try:
-            result = db.query(COVID_USER).filter_by(**{"token": token}).all()
+            result = db.query(CovidUser).filter_by(**condition).all()
             return result
         except Exception as _:
             db.rollback()
@@ -51,7 +52,7 @@ class COVID_USER(Base):
     @staticmethod
     def get_all_user(*, db):
         try:
-            result = db.query(COVID_USER).filter_by(**{}).all()
+            result = db.query(CovidUser).all()
             return result
         except Exception as _:
             db.rollback()

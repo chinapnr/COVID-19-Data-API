@@ -2,10 +2,11 @@ import datetime
 from sqlalchemy import Column, Integer, String, Date, and_, func
 
 from app.db.session import Session
-from app.models.base import Base
+from app.models import Base
 
 
 class Covid19(Base):
+    __tablename__ = 'covid19'
     seq_id = Column(Integer, primary_key=True)
     continents_en = Column(String(100), comment="洲英文名")
     continents_ch = Column(String(100), comment="洲中文名")
@@ -72,9 +73,9 @@ class Covid19(Base):
         try:
             result = db.query(
                 Covid19.country_en, Covid19.country_ch, Covid19.province_en, Covid19.province_ch,
-                func.sum(Covid19.confirmed).label("sum_confirmed"),
-                func.sum(Covid19.deaths).label("sum_deaths"),
-                func.sum(Covid19.recovered).label("sum_recovered"),
+                func.sum(Covid19.confirmed_add).label("sum_confirmed"),
+                func.sum(Covid19.deaths_add).label("sum_deaths"),
+                func.sum(Covid19.recovered_add).label("sum_recovered"),
             ).filter(
                 and_(Covid19.country_en == country, Covid19.update_date.between(stime, etime))
             ).group_by(Covid19.province_en).all()
@@ -90,7 +91,7 @@ class Covid19(Base):
         try:
             result = db.query(Covid19).filter(
                 and_(Covid19.country_en == country, Covid19.update_date.between(stime, etime))
-            ).group_by(Covid19.update_date).all()
+            ).all()
             return result
         except Exception as _:
             db.rollback()
@@ -103,9 +104,9 @@ class Covid19(Base):
         try:
             result = db.query(
                 Covid19.country_en, Covid19.country_ch, Covid19.province_en, Covid19.province_ch,
-                func.sum(Covid19.confirmed).label("sum_confirmed"),
-                func.sum(Covid19.deaths).label("sum_deaths"),
-                func.sum(Covid19.recovered).label("sum_recovered"),
+                func.sum(Covid19.confirmed_add).label("sum_confirmed"),
+                func.sum(Covid19.deaths_add).label("sum_deaths"),
+                func.sum(Covid19.recovered_add).label("sum_recovered"),
             ).filter(
                 and_(Covid19.province_en == city, Covid19.update_date.between(stime, etime)
                      )

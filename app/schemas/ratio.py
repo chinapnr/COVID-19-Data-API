@@ -1,6 +1,6 @@
 from typing import List
 
-from app.models import BaseResponse
+from app.schemas import BaseResponse
 
 from pydantic import BaseModel
 

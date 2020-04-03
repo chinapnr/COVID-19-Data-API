@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from app.models import BaseResponse
+from app.schemas import BaseResponse
 
 
 class EmailFilters(BaseModel):

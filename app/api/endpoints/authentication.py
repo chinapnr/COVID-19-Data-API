@@ -1,3 +1,4 @@
+import time
 from base64 import b64encode
 
 from fishbase import gen_random_str
@@ -8,16 +9,16 @@ from fastapi.security import APIKeyHeader
 from fishbase.fish_common import get_time_uuid
 from fastapi import Security, APIRouter, Depends, Body
 
-from app.db.utils import get_db
+from app.db import get_db
+from app.models.captcha import Captcha
 from app.utils.email import EmailUtils
-from app.models.user import COVID_USER
-from app.utils.redis import RedisClient
+from app.models.user import CovidUser
 from app.schemas.authentication import *
+from app.config.config import HEADER_KEY
 from app.utils.bloom import BloomFilterUtils
 from app.schemas.errors import CustomException
 from app.utils.captcha.captcha import CaptchaUtils
 from app.schemas.common import get_session_filters
-from app.config.config import HEADER_KEY, REDIS_CONFIG
 from app.schemas.const import HTTP_FORBIDDEN, EMAIL_ERROR, CAPTCHA_ERROR
 
 # 设置请求头参数参数信息
@@ -42,21 +43,28 @@ async def authentication_register(
     提交邮箱信息<br/>
     :return:
     """
-    redis = RedisClient(**REDIS_CONFIG)
+    logger.info(f"received parameters, register_filters:{register_filters}")
+
     bloom_filter = BloomFilterUtils()
     email = EmailUtils()
 
-    if not register_filters:
-        raise CustomException(EMAIL_ERROR)
+    if not register_filters or not email.check_email(register_filters.email):
+        raise CustomException(EMAIL_ERROR, msg_dict={"error": "format is incorrect"})
 
     # 邮箱已认证
-    if bloom_filter.contains(register_filters.email):
+    if bloom_filter.contains(register_filters.email) or CovidUser.get_user(
+            db=db,
+            condition={CovidUser.email.key: register_filters.email}
+    ):
         raise CustomException(EMAIL_ERROR, msg_dict={"error": "email has been certified"})
 
     # 验证验证码
-    session_detail = redis.get_json(register_filters.session)
-    if not session_detail or session_detail.get("captcha") != register_filters.captcha:
+    captcha_info = Captcha.get_captcha_by_session(db=db, session=register_filters.session)
+    if not captcha_info or captcha_info.captcha != register_filters.captcha:
         raise CustomException(CAPTCHA_ERROR, msg_dict={"error": "Incorrect captcha"})
+
+    if int(time.time()) > int(captcha_info.expiration):
+        raise CustomException(CAPTCHA_ERROR, msg_dict={"error": "captcha has expired"})
 
     # 发送 token 信息
     token = FishMD5.hmac_md5(register_filters.email, str(get_time_uuid()))
@@ -65,7 +73,7 @@ async def authentication_register(
         raise CustomException(EMAIL_ERROR, msg_dict={"error": "failed to send"})
 
     # 保存，记录邮箱信息
-    COVID_USER.add_user(db=db, email=register_filters.email, token=token)
+    CovidUser.add_user(db=db, email=register_filters.email, token=token)
     bloom_filter.add(register_filters.email)
 
     return AuthenticationRegisterInResponse(
@@ -88,22 +96,31 @@ async def authentication_session() -> AuthenticationSessionInResponse:
 
 @router.get("/captcha", response_model=AuthenticationCaptchaInResponse, name="authentication:captcha")
 async def authentication_captcha(
+        db: Session = Depends(get_db),
         session_filters: SessionFilters = Depends(get_session_filters),
 ) -> AuthenticationCaptchaInResponse:
     """
     获取 验证码 信息
     :return:
     """
-    try:
-        redis = RedisClient(**REDIS_CONFIG)
-        captcha = CaptchaUtils()
+    logger.info(f"received parameters, session_filters:{session_filters}")
 
+    if not session_filters.session:
+        raise CustomException(CAPTCHA_ERROR, msg_dict={"error": "captcha must be filled"})
+
+    try:
+        captcha = CaptchaUtils()
         captcha_info = captcha.gen_code()
         image_file = captcha_info['image_file']
         image_base64 = b64encode(image_file.getvalue())
         image_file.close()
 
-        redis.set_json(session_filters.session, {'captcha': captcha_info['code']}, 3600)
+        Captcha.add_captcha(
+            db=db,
+            captcha=captcha_info['code'],
+            session_id=session_filters.session,
+            expiration=str(int(time.time()) + 1800)
+        )
         return AuthenticationCaptchaInResponse(
             data=image_base64
         )

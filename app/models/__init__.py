@@ -1,8 +1,3 @@
-from pydantic import BaseModel
+from sqlalchemy.ext.declarative import declarative_base
 
-from app.schemas.const import SUCCESS
-
-
-class BaseResponse(BaseModel):
-    code: str = SUCCESS
-    message : str = "success"
+Base = declarative_base()

@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import Query
 
 from app.schemas.authentication import SessionFilters
@@ -27,8 +29,9 @@ def get_area_filters(area_name: str = Query("China", alias="country"), ) -> Area
 
 
 def get_time_filters(
-        stime: str = Query("2020-03-19", alias="stime"),
-        etime: str = Query("2020-03-26", alias="etime"), ) -> TimeFilters:
+        stime: str = Query(datetime.date.today().strftime('%Y-%m-%d'), alias="stime"),
+        etime: str = Query((datetime.date.today() + datetime.timedelta(days=-1)).strftime('%Y-%m-%d'),
+                           alias="etime"), ) -> TimeFilters:
     """
     获取传递的时间区间信息
     :param stime: 开始时间

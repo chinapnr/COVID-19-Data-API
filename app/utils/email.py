@@ -1,19 +1,31 @@
+import re
 import smtplib
 from email.header import Header
 from email.mime.text import MIMEText
+
 from fishbase.fish_logger import logger
+
 from app.utils.singleTon import Singleton
 from app.config.config import MAIL_HOST, MAIL_PASS, MAIL_USER, SUBJECT, SENDER, MAIL_PORT
 
 
 @Singleton
 class EmailUtils:
+    def check_email(self, email):
+        """
+        校验邮箱格式
+        :param email: email
+        :return: bool
+        """
+        expression = r'^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+){0,4}$'
+        return True if re.match(expression, email) else False
+
     def send_mail(self, msg, adds):
         """
         发送邮件
-        :param msg:
-        :param adds:
-        :return:
+        :param msg: 邮件内容
+        :param adds: 收件人信息
+        :return: bool
         """
         receivers = adds
         message = MIMEText(msg, 'plain', 'utf-8')

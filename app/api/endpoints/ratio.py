@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.db.utils import get_db
+from app.db import get_db
 from app.schemas.ratio import *
 from app.schemas.filters import AreaFilters, TimeFilters
 from app.schemas.common import get_area_filters, get_time_filters
