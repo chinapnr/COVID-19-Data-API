@@ -5,8 +5,8 @@ from email.mime.text import MIMEText
 
 from fishbase.fish_logger import logger
 
-from app.utils.singleTon import Singleton
 from app.config.config import MAIL_HOST, MAIL_PASS, MAIL_USER, SUBJECT, SENDER, MAIL_PORT
+from app.utils.singleTon import Singleton
 
 
 @Singleton

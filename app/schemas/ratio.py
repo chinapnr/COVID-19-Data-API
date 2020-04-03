@@ -1,8 +1,8 @@
 from typing import List
 
-from app.schemas import BaseResponse
-
 from pydantic import BaseModel
+
+from app.schemas import BaseResponse
 
 
 class Gender(BaseModel):

@@ -3,11 +3,10 @@ from fastapi import APIRouter, Depends
 from fishbase.fish_logger import logger
 
 from app.db import get_db
-from app.schemas.ratio import *
-from app.schemas.filters import AreaFilters, TimeFilters
-from app.schemas.common import get_area_filters, get_time_filters
-
 from app.models.covid import Covid19
+from app.schemas.common import get_area_filters, get_time_filters
+from app.schemas.filters import AreaFilters, TimeFilters
+from app.schemas.ratio import *
 
 router = APIRouter()
 

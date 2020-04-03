@@ -1,6 +1,7 @@
-import random
 import os
+import random
 from io import BytesIO
+
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 basedir = os.path.abspath(os.path.dirname(__file__))
