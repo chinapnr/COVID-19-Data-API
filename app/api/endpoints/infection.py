@@ -15,20 +15,20 @@ from app.schemas.infection import *
 router = APIRouter()
 
 
-@router.get("/daily", response_model=InfectionDailyInResponse, name="infection:daily")
+@router.get("/detail", response_model=InfectionDailyInResponse, name="infection:daily")
 async def infection_daily(
         token: APIKey = Depends(get_api_key),
         db: Session = Depends(get_db),
         area_filters: AreaFilters = Depends(get_area_filters)
 ) -> InfectionDailyInResponse:
     """
-    根据国家查询每日新增情况<br/>
+    根据国家查询城市每日新增情况<br/>
     :return:
     """
     logger.info(f"received parameters, token:{token}, area_filters:{area_filters}")
     try:
         data = dict()
-        daily_data = Covid19.infection_daily_data(db=db, country=area_filters.name)
+        daily_data = Covid19.get_infection_daily_data(db=db, country=area_filters.name)
         for _d in daily_data:
             data.update({_d.province_en: InfectionDailyModel(
                 diagnose=_d.confirmed_add,
@@ -57,7 +57,7 @@ async def infection_area(
         _country = dict()
         _city = dict()
 
-        area_data = Covid19.infection_area_data(db=db, stime=time_filters.stime, etime=time_filters.etime)
+        area_data = Covid19.get_infection_area_data(db=db, stime=time_filters.stime, etime=time_filters.etime)
         for _d in area_data:
             if _d.continents_en not in _globals:
                 _globals.update({_d.continents_en: {
@@ -103,7 +103,7 @@ async def infection_country(
     logger.info(f"received parameters, token:{token}, area_filters:{area_filters}, time_filters: {time_filters}")
     try:
         city_data = list()
-        country_data = Covid19.infection_country_data(
+        country_data = Covid19.get_infection_country_data(
             db=db, country=area_filters.name, stime=time_filters.stime, etime=time_filters.etime
         )
         for _d in country_data:
@@ -135,7 +135,7 @@ async def infection_country_detail(
     logger.info(f"received parameters, token:{token}, area_filters:{area_filters}, time_filters: {time_filters}")
     try:
         city_data = dict()
-        country_detail_data = Covid19.infection_country_detail_data(
+        country_detail_data = Covid19.get_infection_country_detail_data(
             db=db, country=area_filters.name, stime=time_filters.stime, etime=time_filters.etime
         )
         for _d in country_detail_data:
@@ -172,7 +172,7 @@ async def infection_city(
     """
     logger.info(f"received parameters, token:{token}, city_filters:{city_filters}, time_filters: {time_filters}")
     try:
-        city_data = Covid19.infection_city_data(
+        city_data = Covid19.get_infection_city_data(
             db=db, city=city_filters.name, stime=time_filters.stime, etime=time_filters.etime
         )
         if city_data:
@@ -204,7 +204,7 @@ async def infection_city_detail(
     logger.info(f"received parameters, token:{token}, city_filters:{city_filters}, time_filters: {time_filters}")
     city_detail = []
     try:
-        city_detail_data = Covid19.infection_city_detail_data(
+        city_detail_data = Covid19.get_infection_city_detail_data(
             db=db, city=city_filters.name, stime=time_filters.stime, etime=time_filters.etime
         )
         if city_detail_data:
@@ -219,11 +219,51 @@ async def infection_city_detail(
                     date=str(_d.update_date)
                 ))
         else:
-            city_detail = [InfectionCityGroupByDateModel()]
+            city_detail = [InfectionCityGroupByDateModel(
+                diagnose=0,
+                cure=0,
+                death=0,
+                name_ch="",
+                name_en="",
+                code="",
+                date=""
+            )]
     except Exception as e:
         logger.error(f"{SYSTEM_ERROR}: {e}")
         raise CustomException(SYSTEM_ERROR)
 
     return InfectionCityDetailInResponse(
         data=city_detail
+    )
+
+
+@router.get("/global/detail", response_model=InfectionGlobalDataInResponse, name="infection:global")
+async def infection_global_detail(
+        token: APIKey = Depends(get_api_key),
+        db: Session = Depends(get_db),
+) -> InfectionGlobalDataInResponse:
+    """
+    查询全球每个国家当日数据信息<br/>
+    :return:
+    """
+    logger.info(f"received parameters, token:{token}")
+
+    global_data = list()
+    try:
+        global_detail_data = Covid19.get_infection_global_data(db=db)
+        for _d in global_detail_data:
+            global_data.append({
+                "diagnose": _d.sum_confirmed,
+                "cure": _d.sum_recovered,
+                "death": _d.sum_deaths,
+                "name_ch": _d.country_ch,
+                "name_en": _d.country_en,
+                "code": _d.country_en
+            })
+    except Exception as e:
+        logger.error(f"{SYSTEM_ERROR}: {e}")
+        raise CustomException(SYSTEM_ERROR)
+
+    return InfectionGlobalDataInResponse(
+        data=global_data
     )

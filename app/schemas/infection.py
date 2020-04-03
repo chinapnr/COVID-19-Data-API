@@ -136,3 +136,7 @@ class InfectionCityDetailInResponse(BaseResponse):
 
 class InfectionGlobalInResponse(BaseResponse):
     data: dict
+
+
+class InfectionGlobalDataInResponse(BaseResponse):
+    data: List[dict]
