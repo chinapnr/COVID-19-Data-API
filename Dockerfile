@@ -2,6 +2,8 @@ FROM python:3.7
 
 MAINTAINER David Yi <wingfish@gmail.com>
 
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple
+
 COPY ["./requirements.txt", "."]
 RUN pip install -r requirements.txt
 
