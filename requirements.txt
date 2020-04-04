@@ -10,3 +10,4 @@ bitarray==1.2.1
 uvicorn==0.11.3
 chardet==3.0.4
 pytest==5.4.1
+requests==2.23.0
