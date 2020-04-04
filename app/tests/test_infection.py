@@ -1,17 +1,27 @@
 import pytest
 
 from unittest import TestCase
+import os
+
+import json
 
 
-@pytest.mark.usefixtures('client', 'token')
+@pytest.mark.usefixtures('client', 'token', 'header_key')
 class InfectionTest(TestCase):
-    def setUp(self) -> None:
-        pass
 
-    def tearDown(self) -> None:
-        pass
+    def test_infection_daily(self, client, token, header_key) -> None:
+        payload = {
+            '', ''
+        }
+        headers = {
+            'Content-Type': 'application/json',
+            header_key: token,
+        }
+        response = client.post('/daily', data=json.dumps(payload), headers=headers)
+        print("response: ", response.data)
+        assert response.status_code == 200
+        self.coupon_code = response.json.get('data').get('coupon_code')
 
-    def test_infection_daily(self, client, token) -> None:
         self.fail()
 
     def test_infection_area(self, client, token):
@@ -27,4 +37,7 @@ class InfectionTest(TestCase):
         self.fail()
 
     def test_infection_city_detail(self, client, token):
+        self.fail()
+
+    def test_infection_global_detail(self, client, token):
         self.fail()
