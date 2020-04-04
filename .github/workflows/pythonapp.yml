@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.5, 3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
       - uses: actions/checkout@v2
@@ -34,4 +34,4 @@ jobs:
       - name: Test with pytest
         run: |
           pip install pytest
-          pytest
+           DATABASE_URI=sqlite:///./app/tests/test.db HEADER_KEY=Token PROJECT_NAME=Covid VERSION=v1.0 API_VERSION= MAIL_PORT=25 pytest app/tests --cov=app
