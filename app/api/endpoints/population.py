@@ -17,7 +17,7 @@ async def population(
         db: Session = Depends(get_db)
 ) -> PopulationInResponse:
     """
-    查询所有国家人口数据信息 <br/>
+    查询所有国家人口数据信息
     """
     logger.info(f"received parameters, token:{token}")
 

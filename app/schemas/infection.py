@@ -135,8 +135,17 @@ class InfectionCityDetailInResponse(BaseResponse):
 
 
 class InfectionGlobalInResponse(BaseResponse):
-    data: dict
+    data: Mapping[str, Mapping[str, Mapping[str, str]]]
+
+
+class GlobalDataModel(BaseModel):
+    diagnose: Optional[int] = 0
+    cure: Optional[int] = 0
+    death: Optional[int] = 0
+    name_ch: Optional[str] = ""
+    name_en: Optional[str] = ""
+    code: Optional[str] = ""
 
 
 class InfectionGlobalDataInResponse(BaseResponse):
-    data: List[dict]
+    data: List[GlobalDataModel]
