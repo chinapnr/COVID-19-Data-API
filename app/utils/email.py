@@ -35,7 +35,7 @@ class EmailUtils:
         message['Subject'] = Header(subject, 'utf-8')
 
         try:
-            smtp = smtplib.SMTP_SSL()
+            smtp = smtplib.SMTP_SSL(host=MAIL_HOST)
             smtp.connect(MAIL_HOST, MAIL_PORT)
             smtp.login(MAIL_USER, MAIL_PASS)
             smtp.sendmail(SENDER, receivers, message.as_string())
