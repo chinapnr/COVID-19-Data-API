@@ -23,7 +23,7 @@ class CaptchaFilters(BaseModel):
     captcha: str = Field(default="")
 
 
-class RegisterFilters(SessionFilters, CaptchaFilters, EmailFilters):
+class RegisterFilters(EmailFilters):
     pass
 
 

@@ -1,16 +1,16 @@
-from fastapi import APIRouter, Depends
-from fastapi.security.api_key import APIKey
-from fishbase.fish_logger import logger
 from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends
+from fishbase.fish_logger import logger
+from fastapi.security.api_key import APIKey
 
-from app.api.endpoints.authentication import get_api_key
 from app.db import get_db
+from app.schemas.infection import *
 from app.models.covid import Covid19
-from app.schemas.common import get_area_filters, get_time_filters, get_city_filters
 from app.schemas.const import SYSTEM_ERROR
 from app.schemas.errors import CustomException
 from app.schemas.filters import AreaFilters, TimeFilters
-from app.schemas.infection import *
+from app.api.endpoints.authentication import get_api_key
+from app.schemas.common import get_area_filters, get_time_filters, get_city_filters
 
 router = APIRouter()
 
@@ -22,8 +22,7 @@ async def infection_daily(
         area_filters: AreaFilters = Depends(get_area_filters)
 ) -> InfectionDailyInResponse:
     """
-    根据国家查询城市每日新增情况<br/>
-    :return:
+    根据国家查询城市每日新增数据信息
     """
     logger.info(f"received parameters, token:{token}, area_filters:{area_filters}")
     try:
@@ -48,8 +47,7 @@ async def infection_area(
         time_filters: TimeFilters = Depends(get_time_filters)
 ) -> InfectionGlobalInResponse:
     """
-    查询发生过疫情的地区信息（包含洲，国家，地区）<br/>
-    :return:
+    查询发生过疫情的地区信息（包含洲，国家，地区）
     """
     logger.info(f"received parameters, token:{token}, time_filters:{time_filters}")
     try:
@@ -59,6 +57,9 @@ async def infection_area(
 
         area_data = Covid19.get_infection_area_data(db=db, stime=time_filters.stime, etime=time_filters.etime)
         for _d in area_data:
+            if not _d.continents_en:
+                continue
+
             if _d.continents_en not in _globals:
                 _globals.update({_d.continents_en: {
                     "name_ch": _d.continents_ch,
@@ -98,7 +99,6 @@ async def infection_country(
         time_filters: TimeFilters = Depends(get_time_filters), ) -> InfectionCountryInResponse:
     """
     查询每个国家每个城市一段时间内的汇总数据（包含 确诊，治愈，死亡）信息
-    :return:
     """
     logger.info(f"received parameters, token:{token}, area_filters:{area_filters}, time_filters: {time_filters}")
     try:
@@ -130,7 +130,6 @@ async def infection_country_detail(
         time_filters: TimeFilters = Depends(get_time_filters), ) -> InfectionCountryDetailInResponse:
     """
     查询每个国家每个城市一段时间内的明细数据（包含 确诊，治愈，死亡）信息
-    :return:
     """
     logger.info(f"received parameters, token:{token}, area_filters:{area_filters}, time_filters: {time_filters}")
     try:
@@ -167,8 +166,7 @@ async def infection_city(
         city_filters: AreaFilters = Depends(get_city_filters),
         time_filters: TimeFilters = Depends(get_time_filters), ) -> InfectionCityInResponse:
     """
-    根据国家查询每个城市一段时间内的汇总数据信息（包含 确诊，治愈，死亡）<br/>
-    :return:
+    根据国家查询每个城市一段时间内的汇总数据信息（包含 确诊，治愈，死亡）
     """
     logger.info(f"received parameters, token:{token}, city_filters:{city_filters}, time_filters: {time_filters}")
     try:
@@ -198,8 +196,7 @@ async def infection_city_detail(
         city_filters: AreaFilters = Depends(get_city_filters),
         time_filters: TimeFilters = Depends(get_time_filters), ) -> InfectionCityDetailInResponse:
     """
-    根据国家查询每个城市一段时间内的明细数据信息（包含 确诊，治愈，死亡）<br/>
-    :return:
+    根据国家查询每个城市一段时间内的明细数据信息（包含 确诊，治愈，死亡）
     """
     logger.info(f"received parameters, token:{token}, city_filters:{city_filters}, time_filters: {time_filters}")
     city_detail = []
@@ -243,8 +240,7 @@ async def infection_global_detail(
         db: Session = Depends(get_db),
 ) -> InfectionGlobalDataInResponse:
     """
-    查询全球每个国家当日数据信息<br/>
-    :return:
+    查询全球每个国家当日数据信息
     """
     logger.info(f"received parameters, token:{token}")
 
