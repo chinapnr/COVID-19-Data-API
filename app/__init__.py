@@ -18,7 +18,7 @@ from app.schemas.const import VALIDATION_ERROR, ERR_MSG
 from app.schemas.errors import CustomException
 from app.utils.bloom import BloomFilterUtils
 
-app = FastAPI(title=config.PROJECT_NAME, version=VERSION)
+app = FastAPI(title=config.PROJECT_NAME, version=VERSION, openapi_url="/docs/openapi.json")
 app.include_router(api_router, prefix=API_VERSION)
 
 # CORS

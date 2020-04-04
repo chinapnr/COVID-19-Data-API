@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Date
 
-from app.db.session import Session
+from app.db.session import Session, engine
 from app.models import Base
 
 
@@ -22,3 +22,7 @@ class Population(Base):
             raise
         finally:
             db.close()
+
+
+if __name__ == '__main__':
+    Base.metadata.create_all(engine)
