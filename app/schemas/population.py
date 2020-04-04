@@ -10,7 +10,6 @@ class PopulationModel(BaseModel):
     人口数据信息
     """
     country_en: Optional[str] = ""
-    country_ch: Optional[str] = ""
     population_num: Optional[int] = 0
 
 

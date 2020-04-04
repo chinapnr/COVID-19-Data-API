@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy import Column, Integer, String, Date, and_
 
 from app.db.session import Session, engine
 from app.models import Base
@@ -13,9 +13,16 @@ class Population(Base):
     update_date = Column(Date, comment="更新日期")
 
     @staticmethod
-    def get_population(*, db: Session):
+    def get_population(*, db: Session, country: str, date: str):
         try:
-            result = db.query(Population).all()
+            if country:
+                filters = and_(
+                    Population.country_en == country,
+                    Population.update_date.between("-".join([date, "01", "01"]), "-".join([date, "12", "31"]))
+                )
+            else:
+                filters = Population.update_date.between("-".join([date, "01", "01"]), "-".join([date, "12", "31"]))
+            result = db.query(Population).filter(filters).all()
             return result
         except Exception as _:
             db.rollback()

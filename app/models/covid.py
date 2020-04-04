@@ -1,5 +1,3 @@
-import datetime
-
 from sqlalchemy import Column, Integer, String, Date, and_, func
 
 from app.db.session import Session
@@ -24,72 +22,13 @@ class Covid19(Base):
     update_date = Column(Date, comment="更新日期")
 
     @staticmethod
-    def get_all(db: Session):
-        try:
-            result = db.query(Covid19).all()
-            return result
-        except Exception as _:
-            db.rollback()
-            raise
-        finally:
-            db.close()
-
-    @staticmethod
-    def get_infection_daily_data(*, db: Session, country: str, ):
-        try:
-            result = db.query(Covid19).filter_by(
-                country_en=country,
-                update_date=datetime.date.today()
-            ).group_by(Covid19.province_en).all()
-            return result
-        except Exception as _:
-            db.rollback()
-            raise
-        finally:
-            db.close()
-
-    @staticmethod
-    def get_infection_area_data(*, db: Session, stime: str, etime: str):
-        try:
-            result = db.query(
-                Covid19.continents_en,
-                Covid19.continents_ch,
-                Covid19.country_en,
-                Covid19.country_ch,
-                Covid19.province_ch,
-                Covid19.province_en
-            ).filter(
-                Covid19.update_date.between(stime, etime)
-            ).group_by(Covid19.continents_en, Covid19.country_en, Covid19.province_en).all()
-            return result
-        except Exception as _:
-            db.rollback()
-            raise
-        finally:
-            db.close()
-
-    @staticmethod
     def get_infection_country_data(*, db: Session, country: str, stime: str, etime: str):
         try:
             result = db.query(
-                Covid19.country_en, Covid19.country_ch, Covid19.province_en, Covid19.province_ch,
-                func.sum(Covid19.confirmed_add).label("sum_confirmed"),
-                func.sum(Covid19.deaths_add).label("sum_deaths"),
-                func.sum(Covid19.recovered_add).label("sum_recovered"),
+                func.sum(Covid19.confirmed_add).label("confirmed_add"),
+                func.sum(Covid19.deaths_add).label("deaths_add"),
+                func.sum(Covid19.recovered_add).label("recovered_add"),
             ).filter(
-                and_(Covid19.country_en == country, Covid19.update_date.between(stime, etime))
-            ).group_by(Covid19.province_en).all()
-            return result
-        except Exception as _:
-            db.rollback()
-            raise
-        finally:
-            db.close()
-
-    @staticmethod
-    def get_infection_country_detail_data(*, db: Session, country: str, stime: str, etime: str):
-        try:
-            result = db.query(Covid19).filter(
                 and_(Covid19.country_en == country, Covid19.update_date.between(stime, etime))
             ).all()
             return result
@@ -100,16 +39,15 @@ class Covid19(Base):
             db.close()
 
     @staticmethod
-    def get_infection_city_data(*, db: Session, city: str, stime: str, etime: str):
+    def get_infection_country_city_data(*, db: Session, country: str, stime: str, etime: str):
         try:
             result = db.query(
-                Covid19.country_en, Covid19.country_ch, Covid19.province_en, Covid19.province_ch,
-                func.sum(Covid19.confirmed_add).label("sum_confirmed"),
-                func.sum(Covid19.deaths_add).label("sum_deaths"),
-                func.sum(Covid19.recovered_add).label("sum_recovered"),
+                Covid19.province_en,
+                func.sum(Covid19.confirmed_add).label("confirmed_add"),
+                func.sum(Covid19.deaths_add).label("deaths_add"),
+                func.sum(Covid19.recovered_add).label("recovered_add"),
             ).filter(
-                and_(Covid19.province_en == city, Covid19.update_date.between(stime, etime)
-                     )
+                and_(Covid19.country_en == country, Covid19.update_date.between(stime, etime))
             ).group_by(Covid19.province_en).all()
             return result
         except Exception as _:
@@ -119,12 +57,26 @@ class Covid19(Base):
             db.close()
 
     @staticmethod
-    def get_infection_city_detail_data(*, db: Session, city: str, stime: str, etime: str):
+    def get_infection_city_data(*, db: Session, city: str, stime: str, etime: str, country: str):
         try:
-            result = db.query(Covid19).filter(
-                and_(Covid19.province_en == city, Covid19.update_date.between(stime, etime)
-                     )
-            ).group_by(Covid19.update_date).all()
+            if country:
+                # 查询条件中有国家
+                filters = and_(
+                    Covid19.province_en == city,
+                    Covid19.update_date.between(stime, etime),
+                    Covid19.country_en == country
+                )
+            else:
+                # 查询条件中无国家
+                filters = and_(Covid19.province_en == city, Covid19.update_date.between(stime, etime))
+
+            result = db.query(
+                func.sum(Covid19.confirmed_add).label("confirmed_add"),
+                func.sum(Covid19.deaths_add).label("deaths_add"),
+                func.sum(Covid19.recovered_add).label("recovered_add"),
+            ).filter(
+                and_(filters)
+            ).all()
             return result
         except Exception as _:
             db.rollback()
@@ -133,17 +85,16 @@ class Covid19(Base):
             db.close()
 
     @staticmethod
-    def get_infection_global_data(*, db: Session):
+    def get_infection_global_data(*, db: Session, stime: str, etime: str):
         try:
             result = db.query(
                 Covid19.country_en,
-                Covid19.country_ch,
-                func.sum(Covid19.confirmed_add).label("sum_confirmed"),
-                func.sum(Covid19.deaths_add).label("sum_deaths"),
-                func.sum(Covid19.recovered_add).label("sum_recovered"),
-            ).filter_by(
-                update_date=datetime.date.today()
-            ).group_by(Covid19.update_date, Covid19.country_en).all()
+                func.sum(Covid19.confirmed_add).label("confirmed_add"),
+                func.sum(Covid19.deaths_add).label("deaths_add"),
+                func.sum(Covid19.recovered_add).label("recovered_add")
+            ).filter(
+                Covid19.update_date.between(stime, etime)
+            ).group_by(Covid19.country_en).all()
             return result
         except Exception as _:
             db.rollback()
