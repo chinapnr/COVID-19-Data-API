@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.encoders import jsonable_encoder
-from fastapi.exceptions import RequestValidationError
 from fishbase.fish_logger import set_log_stdout
 from fishbase.fish_random import gen_random_str
+from pydantic import ValidationError
 from starlette import status
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
@@ -48,15 +48,14 @@ async def exception_handler(request: Request, exc: CustomException):
     )
 
 
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
+@app.exception_handler(ValidationError)
+async def validation_exception_handler(request: Request, exc: ValidationError):
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=jsonable_encoder(
             {
                 "code": "30012",
                 "detail": exc.errors(),
-                "body": exc.body,
                 "message": ERR_MSG["30012"],
                 "response_id": request.state.request_tag
             }

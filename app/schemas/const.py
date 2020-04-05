@@ -5,6 +5,7 @@ HTTP_ERROR = "30013"
 HTTP_FORBIDDEN = "30014"
 EMAIL_ERROR = "30015"
 CAPTCHA_ERROR = "30017"
+PARAM_ERROR = "30018"
 
 ERR_MSG = {
     SUCCESS: "success",
@@ -14,4 +15,7 @@ ERR_MSG = {
     HTTP_FORBIDDEN: "requires authentication token",
     EMAIL_ERROR: "email error, {error}",
     CAPTCHA_ERROR: "captcha error, {error}",
+    PARAM_ERROR: "param error, {error}"
 }
+
+HMT = ("Hong Kong", "Macau", "Taiwan")

@@ -1,22 +1,22 @@
 from pydantic import BaseModel, Field
 
 
-class AreaFilters(BaseModel):
+class RegionFilters(BaseModel):
     name: str = Field("", min_length=1)
 
 
-class AllowEmptyAreaFilters(BaseModel):
+class AllowEmptyFilters(BaseModel):
     name: str = Field("")
 
 
-class TimeFilters(BaseModel):
-    stime: str = Field("")
-    etime: str = Field("")
+class DateFilters(BaseModel):
+    start_date: str = Field("")
+    end_date: str = Field("")
 
 
-class DetailFilters(BaseModel):
-    detail: bool = Field(bool)
+class Hmtfilters(BaseModel):
+    include_hmt: bool = Field(bool)
 
 
-class PDateTimeFilters(BaseModel):
+class PopulationYearFilters(BaseModel):
     date: str = Field("")
