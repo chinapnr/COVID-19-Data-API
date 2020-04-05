@@ -8,8 +8,8 @@ from app.db import get_db
 from app.schemas.const import SYSTEM_ERROR
 from app.models.population import Population
 from app.api.endpoints.authentication import get_api_key
-from app.schemas.common import get_allow_empty_country_filters, get_population_date_filters
-from app.schemas.filters import AreaFilters, PDateTimeFilters
+from app.schemas.common import get_allow_empty_region_filters, get_population_year_filters
+from app.schemas.filters import RegionFilters, PopulationYearFilters
 from app.schemas.population import PopulationInResponse, PopulationModel
 
 router = APIRouter()
@@ -19,15 +19,15 @@ router = APIRouter()
 async def population(
         token: APIKey = Depends(get_api_key),
         db: Session = Depends(get_db),
-        country_filters: AreaFilters = Depends(get_allow_empty_country_filters),
-        population_date_filters: PDateTimeFilters = Depends(get_population_date_filters),
+        country_filters: RegionFilters = Depends(get_allow_empty_region_filters),
+        population_year_filters: PopulationYearFilters = Depends(get_population_year_filters),
 ) -> PopulationInResponse:
     logger.info(f"received parameters, token:{token}")
 
     try:
         _population = list()
         population_data = Population.get_population(db=db, country=country_filters.name,
-                                                    date=population_date_filters.date)
+                                                    date=population_year_filters.date)
         for _d in population_data:
             _population.append(
                 PopulationModel(

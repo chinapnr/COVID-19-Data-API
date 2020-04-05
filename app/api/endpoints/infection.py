@@ -10,50 +10,130 @@ from app.models.covid import Covid19
 from app.schemas.const import SYSTEM_ERROR
 from app.schemas.errors import CustomException
 from app.api.endpoints.authentication import get_api_key
-from app.schemas.filters import AreaFilters, TimeFilters, DetailFilters, AllowEmptyAreaFilters
+from app.schemas.filters import RegionFilters, DateFilters, Hmtfilters, AllowEmptyFilters
 
 router = APIRouter()
 
 
-@router.get("/country", response_model=InfectionCountryInResponse, name="infection:country")
-async def infection_country(
+@router.get("/region", response_model=InfectionRegionInResponse, name="infection:region")
+async def infection_region(
         token: APIKey = Depends(get_api_key),
         db: Session = Depends(get_db),
-        country_filters: AreaFilters = Depends(get_country_filters),
-        time_filters: TimeFilters = Depends(get_time_filters),
-        detail_filters: DetailFilters = Depends(get_detail_filters),
-) -> InfectionCountryInResponse:
-    logger.info(f"received parameters, token:{token}, area_filters:{country_filters}, time_filters: {time_filters}")
+        region_filters: RegionFilters = Depends(get_region_filters),
+        date_filters: DateFilters = Depends(get_date_filters),
+        hmt_filters: Hmtfilters = Depends(get_hmt_filters),
+) -> InfectionRegionInResponse:
+    logger.info(
+        f"received parameters, token:{token}, region_filters:{region_filters}, "
+        f"date_filters: {date_filters}, hmt_filters:{hmt_filters}")
 
+    # 判断日期
+    date_filters = check_date_filter(date_filters)
+    # 判断 htm
+    hmt_filters = check_htm_filter(hmt_filters, region_filters)
     try:
-        data = InfectionCountryModel()
-        # 查询国家数据信息，城市 area 为 []
-        country_data = Covid19.get_infection_country_data(
-            db=db, country=country_filters.name, stime=time_filters.stime,
-            etime=time_filters.etime
+        data = dict()
+        data["region"] = {region_filters.name: {}}
+
+        region_data = Covid19.get_infection_region_data(
+            db=db, country=region_filters.name, start_date=date_filters.start_date,
+            end_date=date_filters.end_date,
+            hmt=hmt_filters.include_hmt
         )
-        if country_data:
-            data.name = country_filters.name
-            data.confirmed_add = country_data[0].confirmed_add
-            data.deaths_add = country_data[0].deaths_add
-            data.recovered_add = country_data[0].recovered_add
-            data.area = []
-        if detail_filters.detail:
-            # 查询国家数据信息，包含城市 area 信息
-            detail_city_data = Covid19.get_infection_country_city_data(
-                db=db, country=country_filters.name, stime=time_filters.stime, etime=time_filters.etime
-            )
-            for _d in detail_city_data:
-                data.area.append({
-                    "name": _d.province_en,
-                    "confirmed_add": _d.confirmed_add,
-                    "deaths_add": _d.deaths_add,
-                    "recovered_add": _d.recovered_add,
-                })
+        for _d in region_data:
+            if not data.get("region").get(region_filters.name).get(str(_d.update_date)):
+                data.get("region").get(region_filters.name).update(
+                    {
+                        str(_d.update_date): {
+                            "confirmed_add": _d.confirmed_add,
+                            "deaths_add": _d.deaths_add,
+                            "recovered_add": _d.recovered_add,
+                            "confirmed": _d.confirmed,
+                            "deaths": _d.deaths,
+                            "recovered": _d.recovered
+                        }
+                    }
+                )
+            else:
+                data["region"][region_filters.name][str(_d.update_date)]["confirmed_add"] += _d.confirmed_add
+                data["region"][region_filters.name][str(_d.update_date)]["deaths_add"] += _d.deaths_add
+                data["region"][region_filters.name][str(_d.update_date)]["recovered_add"] += _d.recovered_add
+                data["region"][region_filters.name][str(_d.update_date)]["confirmed"] += _d.confirmed
+                data["region"][region_filters.name][str(_d.update_date)]["deaths"] += _d.deaths
+                data["region"][region_filters.name][str(_d.update_date)]["recovered"] += _d.recovered
     except Exception as e:
         logger.error(f"{SYSTEM_ERROR}: {e}")
         raise CustomException(SYSTEM_ERROR)
-    return InfectionCountryInResponse(
+    return InfectionRegionInResponse(
+        data=data
+    )
+
+
+@router.get("/region/detail", response_model=InfectionRegionDetailInResponse, name="infection:region")
+async def infection_region_detail(
+        token: APIKey = Depends(get_api_key),
+        db: Session = Depends(get_db),
+        region_filters: RegionFilters = Depends(get_region_filters),
+        date_filters: DateFilters = Depends(get_date_filters),
+        hmt_filters: Hmtfilters = Depends(get_hmt_filters),
+) -> InfectionRegionDetailInResponse:
+    logger.info(
+        f"received parameters, token:{token}, region_filters:{region_filters}, "
+        f"date_filters: {date_filters}, hmt_filters:{hmt_filters}")
+
+    # 判断日期
+    date_filters = check_date_filter(date_filters)
+    # 判断 htm
+    hmt_filters = check_htm_filter(hmt_filters, region_filters)
+    try:
+        data = dict({"area": {}})
+        area_data = Covid19.get_infection_country_area_data(
+            db=db, country=region_filters.name, start_date=date_filters.start_date,
+            end_date=date_filters.end_date,
+            hmt=hmt_filters.include_hmts
+        )
+        for _d in area_data:
+            if not data.get("area").get(str(_d.province_en)):
+                # 城市不存在
+                data.get("area").update({str(_d.province_en): {
+                    str(_d.update_date): {
+                        "confirmed_add": _d.confirmed_add,
+                        "deaths_add": _d.deaths_add,
+                        "recovered_add": _d.recovered_add,
+                        "confirmed": _d.confirmed,
+                        "deaths": _d.deaths,
+                        "recovered": _d.recovered
+                    }
+                }
+                })
+            else:
+                # 城市已经存在
+                if data.get("area").get(_d.province_en).get(str(_d.update_date)):
+                    # 日期已经存在
+                    data["area"][str(_d.province_en)][str(_d.update_date)]["confirmed_add"] += _d.confirmed_add
+                    data["area"][str(_d.province_en)][str(_d.update_date)]["deaths_add"] += _d.deaths_add
+                    data["area"][str(_d.province_en)][str(_d.update_date)]["recovered_add"] += _d.recovered_add
+                    data["area"][str(_d.province_en)][str(_d.update_date)]["confirmed"] += _d.confirmed
+                    data["area"][str(_d.province_en)][str(_d.update_date)]["deaths"] += _d.deaths
+                    data["area"][str(_d.province_en)][str(_d.update_date)]["recovered"] += _d.recovered
+                else:
+                    # 日期不存在
+                    data.get("area").get(_d.province_en).update({
+                        str(_d.update_date): {
+                            "confirmed_add": _d.confirmed_add,
+                            "deaths_add": _d.deaths_add,
+                            "recovered_add": _d.recovered_add,
+                            "confirmed": _d.confirmed,
+                            "deaths": _d.deaths,
+                            "recovered": _d.recovered
+                        }
+                    })
+
+    except Exception as e:
+        logger.error(f"{SYSTEM_ERROR}: {e}")
+        raise CustomException(SYSTEM_ERROR)
+
+    return InfectionRegionDetailInResponse(
         data=data
     )
 
@@ -62,16 +142,16 @@ async def infection_country(
 async def infection_city(
         token: APIKey = Depends(get_api_key),
         db: Session = Depends(get_db),
-        country_filters: AllowEmptyAreaFilters = Depends(get_allow_empty_country_filters),
-        area_filters: AreaFilters = Depends(get_area_filters),
-        time_filters: TimeFilters = Depends(get_time_filters),
+        country_filters: AllowEmptyFilters = Depends(get_allow_empty_region_filters),
+        area_filters: RegionFilters = Depends(get_area_filters),
+        time_filters: DateFilters = Depends(get_date_filters),
 ) -> InfectionCityInResponse:
     logger.info(f"received parameters, token:{token}, area_filters:{area_filters}, time_filters: {time_filters}")
 
     try:
         city_detail = InfectionCityNoNameModel()
         city_data = Covid19.get_infection_city_data(
-            db=db, city=area_filters.name, stime=time_filters.stime, etime=time_filters.etime,
+            db=db, city=area_filters.name, stime=time_filters.start_date, etime=time_filters.end_date,
             country=country_filters.name
         )
         if city_data:
@@ -91,13 +171,15 @@ async def infection_city(
 async def infection_global_detail(
         token: APIKey = Depends(get_api_key),
         db: Session = Depends(get_db),
-        time_filters: TimeFilters = Depends(get_time_filters)
+        time_filters: DateFilters = Depends(get_date_filters)
 ) -> InfectionGlobalDataInResponse:
     logger.info(f"received parameters, token:{token}")
 
     try:
         global_detail = GlobalDataModel()
-        global_data = Covid19.get_infection_global_data(db=db, stime=time_filters.stime, etime=time_filters.etime)
+        global_data = Covid19.get_infection_global_data(
+            db=db, stime=time_filters.start_date, etime=time_filters.end_date
+        )
         for _d in global_data:
             global_detail.country.update({
                 _d.country_en: {

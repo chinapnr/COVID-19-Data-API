@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, Date, and_, func
 
 from app.db.session import Session
 from app.models import Base
+from app.schemas.const import HMT
 
 
 class Covid19(Base):
@@ -22,15 +23,28 @@ class Covid19(Base):
     update_date = Column(Date, comment="更新日期")
 
     @staticmethod
-    def get_infection_country_data(*, db: Session, country: str, stime: str, etime: str):
+    def get_infection_region_data(*, db: Session, country: str, start_date: str, end_date: str, hmt: bool):
         try:
+            if hmt:
+                # 包含港澳台
+                filters = and_(Covid19.continents_en != "")
+            else:
+                # 不包含港澳台
+                filters = and_(Covid19.continents_en != "",
+                               Covid19.province_en.notin_(HMT))
+
             result = db.query(
-                func.sum(Covid19.confirmed_add).label("confirmed_add"),
-                func.sum(Covid19.deaths_add).label("deaths_add"),
-                func.sum(Covid19.recovered_add).label("recovered_add"),
+                Covid19.update_date,
+                Covid19.confirmed_add,
+                Covid19.deaths_add,
+                Covid19.recovered_add,
+                Covid19.confirmed,
+                Covid19.deaths,
+                Covid19.recovered,
             ).filter(
-                and_(Covid19.country_en == country, Covid19.update_date.between(stime, etime))
-            ).all()
+                and_(Covid19.country_en == country, Covid19.update_date.between(start_date, end_date)),
+                filters
+            ).group_by(Covid19.update_date, Covid19.province_ch).all()
             return result
         except Exception as _:
             db.rollback()
@@ -39,16 +53,28 @@ class Covid19(Base):
             db.close()
 
     @staticmethod
-    def get_infection_country_city_data(*, db: Session, country: str, stime: str, etime: str):
+    def get_infection_country_area_data(*, db: Session, country: str, start_date: str, end_date: str, hmt: bool):
         try:
+            if hmt:
+                # 包含港澳台
+                filters = and_(Covid19.continents_en != "")
+            else:
+                # 不包含港澳台
+                filters = and_(Covid19.continents_en != "",
+                               Covid19.province_en.notin_(HMT))
             result = db.query(
+                Covid19.update_date,
                 Covid19.province_en,
-                func.sum(Covid19.confirmed_add).label("confirmed_add"),
-                func.sum(Covid19.deaths_add).label("deaths_add"),
-                func.sum(Covid19.recovered_add).label("recovered_add"),
+                Covid19.confirmed_add,
+                Covid19.deaths_add,
+                Covid19.recovered_add,
+                Covid19.confirmed,
+                Covid19.deaths,
+                Covid19.recovered,
             ).filter(
-                and_(Covid19.country_en == country, Covid19.update_date.between(stime, etime))
-            ).group_by(Covid19.province_en).all()
+                and_(Covid19.country_en == country, Covid19.update_date.between(start_date, end_date)),
+                filters
+            ).group_by(Covid19.update_date, Covid19.province_en).all()
             return result
         except Exception as _:
             db.rollback()

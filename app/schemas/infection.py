@@ -19,7 +19,7 @@ class InfectionCityModel(BaseModel):
     name: str = ""
 
 
-class InfectionCountryModel(BaseModel):
+class InfectionRegionModel(BaseModel):
     name: str = ""
     confirmed_add: int = 0
     deaths_add: int = 0
@@ -27,8 +27,12 @@ class InfectionCountryModel(BaseModel):
     area: List[InfectionCityModel] = []
 
 
-class InfectionCountryInResponse(BaseResponse):
-    data: InfectionCountryModel
+class InfectionRegionInResponse(BaseResponse):
+    data: Mapping[str, Mapping[str, Mapping[str, Mapping[str, int]]]]
+
+
+class InfectionRegionDetailInResponse(InfectionRegionInResponse):
+    data: Mapping[str, Mapping[str, Mapping[str, Mapping[str, int]]]]
 
 
 class InfectionCityInResponse(BaseResponse):
