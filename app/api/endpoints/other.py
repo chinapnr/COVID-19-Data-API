@@ -9,9 +9,9 @@ from app.schemas.const import SYSTEM_ERROR
 from app.models.population import Population
 from app.schemas.errors import CustomException
 from app.api.endpoints.authentication import get_api_key
-from app.schemas.filters import RegionFilters, PopulationYearFilters
+from app.schemas.filters import RegionFilters, Hmtfilters
+from app.schemas.common import get_allow_empty_region_filters, get_region_filters, get_hmt_filters
 from app.schemas.population import PopulationInResponse, PopulationModel, RegionListInResponse, AreaListInResponse
-from app.schemas.common import get_allow_empty_region_filters, get_population_year_filters, get_region_filters
 
 router = APIRouter()
 
@@ -21,15 +21,12 @@ async def population(
         token: APIKey = Depends(get_api_key),
         db: Session = Depends(get_db),
         country_filters: RegionFilters = Depends(get_allow_empty_region_filters),
-        population_year_filters: PopulationYearFilters = Depends(get_population_year_filters),
 ) -> PopulationInResponse:
-    logger.info(f"received parameters, token:{token}, country_filters: {country_filters}, "
-                f"population_year_filters: {population_year_filters}")
+    logger.info(f"received parameters, token:{token}, country_filters: {country_filters}")
 
     try:
         _population = list()
-        population_data = Population.get_population(db=db, country=country_filters.name,
-                                                    date=population_year_filters.date)
+        population_data = Population.get_population(db=db, country=country_filters.name)
         for _d in population_data:
             _population.append(
                 PopulationModel(
@@ -68,12 +65,13 @@ async def region_list(
 async def area_list(
         token: APIKey = Depends(get_api_key),
         db: Session = Depends(get_db),
-        region_filters: RegionFilters = Depends(get_region_filters)
+        region_filters: RegionFilters = Depends(get_region_filters),
+        hmt_filters: Hmtfilters = Depends(get_hmt_filters)
 ) -> AreaListInResponse:
-    logger.info(f"received parameters, token:{token}")
+    logger.info(f"received parameters, token:{token}, region_filters:{region_filters}, hmt_filters: {hmt_filters}")
 
     try:
-        area_data = Covid19.get_area_list(db=db, region=region_filters.name)
+        area_data = Covid19.get_area_list(db=db, region=region_filters.name, hmt=hmt_filters.include_hmt)
         data = [_d[0] for _d in area_data if _d[0]]
     except Exception as e:
         logger.error(f"{SYSTEM_ERROR}: {e}")

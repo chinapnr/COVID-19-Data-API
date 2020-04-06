@@ -39,7 +39,7 @@ class EmailUtils:
             smtp.connect(MAIL_HOST, MAIL_PORT)
             smtp.login(MAIL_USER, MAIL_PASS)
             smtp.sendmail(SENDER, receivers, message.as_string())
-            logger.error(f"send email notification successfully, the recipient is: {adds}. message: {msg}")
+            logger.info(f"send email notification successfully, the recipient is: {adds}. message: {msg}")
             return True
         except Exception as e:
             logger.error(f"Failed to send mail to: {adds}. error: {e}")

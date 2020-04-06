@@ -69,7 +69,7 @@ async def infection_region(
     )
 
 
-@router.get("/region/detail", response_model=InfectionRegionDetailInResponse, name="infection:region")
+@router.get("/region/detail", response_model=InfectionRegionDetailInResponse, name="infection:region detail")
 async def infection_region_detail(
         token: APIKey = Depends(get_api_key),
         db: Session = Depends(get_db),
@@ -138,7 +138,7 @@ async def infection_region_detail(
     )
 
 
-@router.get("/city", response_model=InfectionCityInResponse, name="infection:city")
+@router.get("/city", response_model=InfectionCityInResponse, name="infection:area")
 async def infection_city(
         token: APIKey = Depends(get_api_key),
         db: Session = Depends(get_db),
@@ -170,16 +170,13 @@ async def infection_city(
 @router.get("/global", response_model=InfectionGlobalDataInResponse, name="infection:global")
 async def infection_global_detail(
         token: APIKey = Depends(get_api_key),
-        db: Session = Depends(get_db),
-        time_filters: DateFilters = Depends(get_date_filters)
+        db: Session = Depends(get_db)
 ) -> InfectionGlobalDataInResponse:
     logger.info(f"received parameters, token:{token}")
 
     try:
         global_detail = GlobalDataModel()
-        global_data = Covid19.get_infection_global_data(
-            db=db, stime=time_filters.start_date, etime=time_filters.end_date
-        )
+        global_data = Covid19.get_infection_global_data(db=db)
         for _d in global_data:
             global_detail.country.update({
                 _d.country_en: {

@@ -121,11 +121,33 @@ class Covid19(Base):
         finally:
             db.close()
 
+    @staticmethod
+    def get_area_list(*, db: Session, region: str, hmt: bool):
+        if hmt:
+            # 包含港澳台
+            filters = and_(Covid19.continents_en != "", Covid19.country_en == region)
+        else:
+            # 不包含港澳台
+            filters = and_(Covid19.continents_en != "", Covid19.province_en.notin_(HMT), Covid19.country_en == region)
+
+        try:
+            result = db.query(distinct(Covid19.province_en)).filter(filters).all()
+            return result
+        except Exception as _:
+            db.rollback()
+            raise
+        finally:
+            db.close()
 
     @staticmethod
-    def get_area_list(*, db: Session, region: str):
+    def get_infection_global_data(*, db: Session):
         try:
-            result = db.query(distinct(Covid19.province_en)).filter(Covid19.country_en==region).all()
+            result = db.query(
+                Covid19.country_en,
+                func.sum(Covid19.confirmed_add).label("confirmed_add"),
+                func.sum(Covid19.deaths_add).label("deaths_add"),
+                func.sum(Covid19.recovered_add).label("recovered_add")
+            ).group_by(Covid19.country_en).all()
             return result
         except Exception as _:
             db.rollback()

@@ -9,7 +9,7 @@ from app.db import get_db
 from app.models.user import CovidUser
 from app.utils.email import EmailUtils
 from app.schemas.authentication import *
-from app.config.config import HEADER_KEY
+from app.config.config import HEADER_KEY, EMAIL_CONTENT
 from app.utils.bloom import BloomFilterUtils
 from app.schemas.errors import CustomException
 from app.schemas.const import HTTP_FORBIDDEN, EMAIL_ERROR
@@ -29,8 +29,8 @@ async def get_api_key(token: str = Security(api_key_header), ):
 
 @router.post("/register", response_model=AuthenticationRegisterInResponse, name="authentication:register")
 async def authentication_register(
+        register_filters: RegisterFilters,
         db: Session = Depends(get_db),
-        register_filters: RegisterFilters = Body(..., embed=True, alias="data")
 ) -> AuthenticationRegisterInResponse:
     logger.info(f"received parameters, register_filters:{register_filters}")
 
@@ -49,7 +49,7 @@ async def authentication_register(
 
     # 发送 token 信息
     token = FishMD5.hmac_md5(register_filters.email, str(get_time_uuid()))
-    send_status = email.send_mail(f"Your authentication token is: {token}", register_filters.email)
+    send_status = email.send_mail(EMAIL_CONTENT.format(_Token = token), register_filters.email)
     if not send_status:
         raise CustomException(EMAIL_ERROR, msg_dict={"error": "failed to send"})
 
@@ -59,6 +59,6 @@ async def authentication_register(
 
     return AuthenticationRegisterInResponse(
         data={
-            "token": token
+            "status": True
         }
     )
