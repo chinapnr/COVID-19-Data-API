@@ -33,8 +33,3 @@ MAIL_PASS = os.getenv("MAIL_PASS")
 MAIL_PORT = int(os.getenv("MAIL_PORT") or 465)
 SENDER = os.getenv("SENDER")
 SUBJECT = EMAIL_HEADER or os.getenv("SUBJECT")
-
-try:
-    from .local_config import *
-except Exception as e:
-    pass

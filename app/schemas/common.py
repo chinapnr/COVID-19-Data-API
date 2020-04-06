@@ -29,7 +29,7 @@ def get_region_filters(area_name: str = Query("China", alias="region"), ) -> Reg
     )
 
 
-def get_allow_empty_region_filters(area_name: str = Query("", alias="country"), ) -> AllowEmptyFilters:
+def get_allow_empty_region_filters(area_name: str = Query("", alias="region"), ) -> AllowEmptyFilters:
     return AllowEmptyFilters(
         name=area_name
     )
