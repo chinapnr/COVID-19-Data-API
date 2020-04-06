@@ -138,8 +138,8 @@ async def infection_region_detail(
     )
 
 
-@router.get("/city", response_model=InfectionCityInResponse, name="infection:area")
-async def infection_city(
+@router.get("/area", response_model=InfectionCityInResponse, name="infection:area")
+async def infection_area(
         token: APIKey = Depends(get_api_key),
         db: Session = Depends(get_db),
         country_filters: AllowEmptyFilters = Depends(get_allow_empty_region_filters),
