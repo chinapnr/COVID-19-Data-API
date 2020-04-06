@@ -90,7 +90,7 @@ async def infection_region_detail(
         area_data = Covid19.get_infection_country_area_data(
             db=db, country=region_filters.name, start_date=date_filters.start_date,
             end_date=date_filters.end_date,
-            hmt=hmt_filters.include_hmts
+            hmt=hmt_filters.include_hmt
         )
         for _d in area_data:
             if not data.get("area").get(str(_d.province_en)):

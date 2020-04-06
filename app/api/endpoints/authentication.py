@@ -32,9 +32,6 @@ async def authentication_register(
         db: Session = Depends(get_db),
         register_filters: RegisterFilters = Body(..., embed=True, alias="data")
 ) -> AuthenticationRegisterInResponse:
-    """
-    提交邮箱信息, 获取 Token 认证
-    """
     logger.info(f"received parameters, register_filters:{register_filters}")
 
     bloom_filter = BloomFilterUtils()

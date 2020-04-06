@@ -9,9 +9,16 @@ class PopulationModel(BaseModel):
     """
     人口数据信息
     """
-    country_en: Optional[str] = ""
+    name: Optional[str] = ""
     population_num: Optional[int] = 0
 
 
 class PopulationInResponse(BaseResponse):
     data: List[PopulationModel]
+
+
+class RegionListInResponse(BaseResponse):
+    data: List[str]
+
+class AreaListInResponse(BaseResponse):
+    data: List[str]

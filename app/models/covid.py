@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, and_, func
+from sqlalchemy import Column, Integer, String, Date, and_, func, distinct
 
 from app.db.session import Session
 from app.models import Base
@@ -111,16 +111,21 @@ class Covid19(Base):
             db.close()
 
     @staticmethod
-    def get_infection_global_data(*, db: Session, stime: str, etime: str):
+    def get_region_list(*, db: Session):
         try:
-            result = db.query(
-                Covid19.country_en,
-                func.sum(Covid19.confirmed_add).label("confirmed_add"),
-                func.sum(Covid19.deaths_add).label("deaths_add"),
-                func.sum(Covid19.recovered_add).label("recovered_add")
-            ).filter(
-                Covid19.update_date.between(stime, etime)
-            ).group_by(Covid19.country_en).all()
+            result = db.query(distinct(Covid19.country_en)).all()
+            return result
+        except Exception as _:
+            db.rollback()
+            raise
+        finally:
+            db.close()
+
+
+    @staticmethod
+    def get_area_list(*, db: Session, region: str):
+        try:
+            result = db.query(distinct(Covid19.province_en)).filter(Covid19.country_en==region).all()
             return result
         except Exception as _:
             db.rollback()
