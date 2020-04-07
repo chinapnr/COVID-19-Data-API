@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# IDE
+.idea/*
+
+# Config
+app/config/local_config.*
