@@ -72,7 +72,7 @@ async def area_list(
 
     try:
         area_data = Covid19.get_area_list(db=db, region=region_filters.name, hmt=hmt_filters.include_hmt)
-        data = [_d[0] for _d in area_data if _d[0]]
+        data = [_d[0] for _d in area_data if _d[0] and _d[0] != "Recovered"]
     except Exception as e:
         logger.error(f"{SYSTEM_ERROR}: {e}")
         raise CustomException(SYSTEM_ERROR)

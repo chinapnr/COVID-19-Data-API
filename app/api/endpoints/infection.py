@@ -93,6 +93,8 @@ async def infection_region_detail(
             hmt=hmt_filters.include_hmt
         )
         for _d in area_data:
+            if (str(_d.province_en) == "Recovered"):
+                continue
             if not data.get("area").get(str(_d.province_en)):
                 # 城市不存在
                 data.get("area").update({str(_d.province_en): {
