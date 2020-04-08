@@ -35,6 +35,7 @@ async def authentication_register(
     """
     获取接口调用凭证 <br/>
     email： 获取凭证的邮箱地址
+    凭证会以邮件方式发往改邮箱
     """
 
     logger.info(f"received parameters, register_filters:{register_filters}")

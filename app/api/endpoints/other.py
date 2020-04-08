@@ -54,7 +54,7 @@ async def region_list(
         db: Session = Depends(get_db)
 ) -> RegionListInResponse:
     """
-    查询所有国家 <br/>
+    查询有疫情信息的国家列表 <br/>
     """
 
     logger.info(f"received parameters, token:{token}")
@@ -78,9 +78,9 @@ async def area_list(
         hmt_filters: Hmtfilters = Depends(get_hmt_filters)
 ) -> AreaListInResponse:
     """
-    查询指定国家下的所有地区 <br/>
+    查询指定国家的疫情城市列表数据 <br/>
     region: 国家 <br/>
-    include_hmt: 是否包含港澳台（当 region 为 China 时有效，默认为 true）
+    include_hmt: 默认为 true，当 region 为 China 时返回包含港澳台疫情数据信息，false 为不返回
     """
 
     logger.info(f"received parameters, token:{token}, region_filters:{region_filters}, hmt_filters: {hmt_filters}")
