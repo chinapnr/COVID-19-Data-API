@@ -23,7 +23,8 @@ class Covid19(Base):
     update_date = Column(Date, comment="更新日期")
 
     @staticmethod
-    def get_infection_region_data(*, db: Session, country: str, start_date: str, end_date: str, hmt: bool):
+    def get_infection_region_data(*, db: Session, country: str, start_date: str or None, end_date: str or None,
+                                  hmt: bool):
         try:
             if hmt:
                 # 包含港澳台
@@ -33,18 +34,37 @@ class Covid19(Base):
                 filters = and_(Covid19.continents_en != "",
                                Covid19.province_en.notin_(HMT))
 
-            result = db.query(
-                Covid19.update_date,
-                Covid19.confirmed_add,
-                Covid19.deaths_add,
-                Covid19.recovered_add,
-                Covid19.confirmed,
-                Covid19.deaths,
-                Covid19.recovered,
-            ).filter(
-                and_(Covid19.country_en == country, Covid19.update_date.between(start_date, end_date)),
-                filters
-            ).group_by(Covid19.update_date, Covid19.province_ch).all()
+            if start_date and end_date:
+                # 获取某段时间区间内的数据
+                result = db.query(
+                    Covid19.update_date,
+                    Covid19.confirmed_add,
+                    Covid19.deaths_add,
+                    Covid19.recovered_add,
+                    Covid19.confirmed,
+                    Covid19.deaths,
+                    Covid19.recovered,
+                ).filter(
+                    and_(Covid19.country_en == country, Covid19.update_date.between(start_date, end_date)),
+                    filters
+                ).group_by(Covid19.update_date, Covid19.province_ch).all()
+            else:
+                # 获取最新数据
+                # 获取最新时间
+                max_update_date = db.query(func.max(Covid19.update_date).label("max_update_date")).all()
+
+                result = db.query(
+                    Covid19.update_date,
+                    Covid19.confirmed_add,
+                    Covid19.deaths_add,
+                    Covid19.recovered_add,
+                    Covid19.confirmed,
+                    Covid19.deaths,
+                    Covid19.recovered,
+                ).filter(
+                    and_(Covid19.country_en == country, Covid19.update_date == str(max_update_date[0][0])),
+                    filters
+                ).group_by(Covid19.update_date, Covid19.province_ch).all()
             return result
         except Exception as _:
             db.rollback()
@@ -53,7 +73,8 @@ class Covid19(Base):
             db.close()
 
     @staticmethod
-    def get_infection_country_area_data(*, db: Session, country: str, start_date: str, end_date: str, hmt: bool):
+    def get_infection_country_area_data(*, db: Session, country: str, start_date: str or None, end_date: str or None,
+                                        hmt: bool):
         try:
             if hmt:
                 # 包含港澳台
@@ -62,20 +83,39 @@ class Covid19(Base):
                 # 不包含港澳台
                 filters = and_(Covid19.continents_en != "",
                                Covid19.province_en.notin_(HMT))
-            result = db.query(
-                Covid19.update_date,
-                Covid19.province_en,
-                Covid19.confirmed_add,
-                Covid19.deaths_add,
-                Covid19.recovered_add,
-                Covid19.confirmed,
-                Covid19.deaths,
-                Covid19.recovered,
-            ).filter(
-                and_(Covid19.country_en == country, Covid19.update_date.between(start_date, end_date)),
-                filters
-            ).group_by(Covid19.update_date, Covid19.province_en).all()
-            return result
+            if start_date and end_date:
+                result = db.query(
+                    Covid19.update_date,
+                    Covid19.province_en,
+                    Covid19.confirmed_add,
+                    Covid19.deaths_add,
+                    Covid19.recovered_add,
+                    Covid19.confirmed,
+                    Covid19.deaths,
+                    Covid19.recovered,
+                ).filter(
+                    and_(Covid19.country_en == country, Covid19.update_date.between(start_date, end_date)),
+                    filters
+                ).group_by(Covid19.update_date, Covid19.province_en).all()
+                return result
+            else:
+                # 获取最新时间
+                max_update_date = db.query(func.max(Covid19.update_date).label("max_update_date")).all()
+                result = db.query(
+                    Covid19.update_date,
+                    Covid19.province_en,
+                    Covid19.confirmed_add,
+                    Covid19.deaths_add,
+                    Covid19.recovered_add,
+                    Covid19.confirmed,
+                    Covid19.deaths,
+                    Covid19.recovered,
+                ).filter(
+                    and_(Covid19.country_en == country, Covid19.update_date == str(max_update_date[0][0])),
+                    filters
+                ).group_by(Covid19.update_date, Covid19.province_en).all()
+                return result
+
         except Exception as _:
             db.rollback()
             raise
@@ -83,27 +123,40 @@ class Covid19(Base):
             db.close()
 
     @staticmethod
-    def get_infection_city_data(*, db: Session, city: str, stime: str, etime: str, country: str):
+    def get_infection_city_data(*, db: Session, city: str, stime: str or None, etime: str or None, country: str):
         try:
             if country:
                 # 查询条件中有国家
                 filters = and_(
                     Covid19.province_en == city,
-                    Covid19.update_date.between(stime, etime),
                     Covid19.country_en == country
                 )
             else:
                 # 查询条件中无国家
-                filters = and_(Covid19.province_en == city, Covid19.update_date.between(stime, etime))
+                filters = and_(Covid19.province_en == city)
 
-            result = db.query(
-                func.sum(Covid19.confirmed_add).label("confirmed_add"),
-                func.sum(Covid19.deaths_add).label("deaths_add"),
-                func.sum(Covid19.recovered_add).label("recovered_add"),
-            ).filter(
-                and_(filters)
-            ).all()
-            return result
+            if stime and etime:
+                result = db.query(
+                    func.sum(Covid19.confirmed_add).label("confirmed_add"),
+                    func.sum(Covid19.deaths_add).label("deaths_add"),
+                    func.sum(Covid19.recovered_add).label("recovered_add"),
+                ).filter(
+                    and_(Covid19.update_date.between(stime, etime)),
+                    filters
+                ).all()
+                return result
+            else:
+                # 获取最新时间
+                max_update_date = db.query(func.max(Covid19.update_date).label("max_update_date")).all()
+                result = db.query(
+                    func.sum(Covid19.confirmed_add).label("confirmed_add"),
+                    func.sum(Covid19.deaths_add).label("deaths_add"),
+                    func.sum(Covid19.recovered_add).label("recovered_add"),
+                ).filter(
+                    and_(Covid19.update_date == str(max_update_date[0][0])),
+                    filters
+                ).all()
+                return result
         except Exception as _:
             db.rollback()
             raise

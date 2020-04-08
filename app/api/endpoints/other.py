@@ -22,6 +22,11 @@ async def population(
         db: Session = Depends(get_db),
         country_filters: RegionFilters = Depends(get_allow_empty_region_filters),
 ) -> PopulationInResponse:
+    """
+    查询人口数据信息 <br/>
+    region: 国家 (非必传，默认值查全部国家) <br/>
+    """
+
     logger.info(f"received parameters, token:{token}, country_filters: {country_filters}")
 
     try:
@@ -48,6 +53,10 @@ async def region_list(
         token: APIKey = Depends(get_api_key),
         db: Session = Depends(get_db)
 ) -> RegionListInResponse:
+    """
+    查询所有国家 <br/>
+    """
+
     logger.info(f"received parameters, token:{token}")
 
     try:
@@ -68,6 +77,12 @@ async def area_list(
         region_filters: RegionFilters = Depends(get_region_filters),
         hmt_filters: Hmtfilters = Depends(get_hmt_filters)
 ) -> AreaListInResponse:
+    """
+    查询指定国家下的所有地区 <br/>
+    region: 国家 <br/>
+    include_hmt: 是否包含港澳台（当 region 为 China 时有效，默认为 true）
+    """
+
     logger.info(f"received parameters, token:{token}, region_filters:{region_filters}, hmt_filters: {hmt_filters}")
 
     try:

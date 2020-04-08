@@ -23,6 +23,14 @@ async def infection_region(
         date_filters: DateFilters = Depends(get_date_filters),
         hmt_filters: Hmtfilters = Depends(get_hmt_filters),
 ) -> InfectionRegionInResponse:
+    """
+    查询某个国家在某段时间内的数据信息 <br/>
+    region: 国家 (必传，默认值为 China) <br/>
+    start_date: 开始日期（非必传，不传代表获取最新数据。可单独指定，单独指定表示查询具体一天的数据信息） <br/>
+    end_date: 结束日期 （非必传，不传代表获取最新数据。不可单独指定）<br/>
+    include_hmt: 是否包含港澳台数据（当 region 为 China 时有效，默认为 true）
+    """
+
     logger.info(
         f"received parameters, token:{token}, region_filters:{region_filters}, "
         f"date_filters: {date_filters}, hmt_filters:{hmt_filters}")
@@ -77,6 +85,14 @@ async def infection_region_detail(
         date_filters: DateFilters = Depends(get_date_filters),
         hmt_filters: Hmtfilters = Depends(get_hmt_filters),
 ) -> InfectionRegionDetailInResponse:
+    """
+    查询某个国家在某段时间内的明细数据信息 <br/>
+    region: 国家 (必传，默认值为 China) <br/>
+    start_date: 开始日期（非必传，不传代表获取最新数据。可单独指定，单独指定表示查询具体一天的数据信息） <br/>
+    end_date: 结束日期 （非必传，不传代表获取最新数据。不可单独指定）<br/>
+    include_hmt: 是否包含港澳台数据（当 region 为 China 时有效，默认为 true）
+    """
+
     logger.info(
         f"received parameters, token:{token}, region_filters:{region_filters}, "
         f"date_filters: {date_filters}, hmt_filters:{hmt_filters}")
@@ -93,7 +109,7 @@ async def infection_region_detail(
             hmt=hmt_filters.include_hmt
         )
         for _d in area_data:
-            if (str(_d.province_en) == "Recovered"):
+            if ("Recovered" == str(_d.province_en)):
                 continue
             if not data.get("area").get(str(_d.province_en)):
                 # 城市不存在
@@ -146,14 +162,25 @@ async def infection_area(
         db: Session = Depends(get_db),
         country_filters: AllowEmptyFilters = Depends(get_allow_empty_region_filters),
         area_filters: RegionFilters = Depends(get_area_filters),
-        time_filters: DateFilters = Depends(get_date_filters),
+        date_filters: DateFilters = Depends(get_date_filters),
 ) -> InfectionCityInResponse:
-    logger.info(f"received parameters, token:{token}, area_filters:{area_filters}, time_filters: {time_filters}")
+    """
+     查询某个城市在某段时间内的数据信息 <br/>
+     region: 国家 (非必传) <br/>
+     area: 城市 (必传，默认值为 "Chongqing") <br/>
+     start_date: 开始日期（非必传，不传代表获取最新数据。可单独指定，单独指定表示查询具体一天的数据信息） <br/>
+     end_date: 结束日期 （非必传，不传代表获取最新数据。不可单独指定）<br/>
+     """
+
+    logger.info(f"received parameters, token:{token}, area_filters:{area_filters}, time_filters: {date_filters}")
+
+    # 判断日期
+    date_filters = check_date_filter(date_filters)
 
     try:
         city_detail = InfectionCityNoNameModel()
         city_data = Covid19.get_infection_city_data(
-            db=db, city=area_filters.name, stime=time_filters.start_date, etime=time_filters.end_date,
+            db=db, city=area_filters.name, stime=date_filters.start_date, etime=date_filters.end_date,
             country=country_filters.name
         )
         if city_data:
@@ -174,6 +201,10 @@ async def infection_global_detail(
         token: APIKey = Depends(get_api_key),
         db: Session = Depends(get_db)
 ) -> InfectionGlobalDataInResponse:
+    """
+     查询全球某段时间内的数据信息 <br/>
+     """
+
     logger.info(f"received parameters, token:{token}")
 
     try:
