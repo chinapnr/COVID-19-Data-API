@@ -210,6 +210,7 @@ async def infection_global_detail(
     try:
         global_detail = GlobalDataModel()
         global_data = Covid19.get_infection_global_data(db=db)
+        last_update_date = Covid19.get_last_update_date(db=db)
         for _d in global_data:
             global_detail.country.update({
                 _d.country_en: {
@@ -218,6 +219,7 @@ async def infection_global_detail(
                     "recovered_add": _d.recovered_add
                 }
             })
+            global_detail.last_update_date = str(last_update_date)
             global_detail.confirmed_add += _d.confirmed_add
             global_detail.deaths_add += _d.deaths_add
             global_detail.recovered_add += _d.recovered_add

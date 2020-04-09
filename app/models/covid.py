@@ -207,3 +207,14 @@ class Covid19(Base):
             raise
         finally:
             db.close()
+
+    @staticmethod
+    def get_last_update_date(*, db: Session):
+        try:
+            max_update_date = db.query(func.max(Covid19.update_date).label("max_update_date")).all()
+            return max_update_date[0][0]
+        except Exception as _:
+            db.rollback()
+            raise
+        finally:
+            db.close()
