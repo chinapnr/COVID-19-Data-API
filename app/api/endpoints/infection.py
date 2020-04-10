@@ -156,44 +156,44 @@ async def infection_region_detail(
     )
 
 
-@router.get("/area", response_model=InfectionCityInResponse, name="infection:area")
-async def infection_area(
-        token: APIKey = Depends(get_api_key),
-        db: Session = Depends(get_db),
-        country_filters: AllowEmptyFilters = Depends(get_allow_empty_region_filters),
-        area_filters: RegionFilters = Depends(get_area_filters),
-        date_filters: DateFilters = Depends(get_date_filters),
-) -> InfectionCityInResponse:
-    """
-     查询指定城市在某段时间内的疫情数据信息 <br/>
-     region: 国家 (非必传) <br/>
-     area: 城市 (必传，默认值为 "Chongqing") <br/>
-     start_date: 开始日期（非必传，不传代表获取最新数据。可单独指定，单独指定表示查询具体一天的数据信息） <br/>
-     end_date: 结束日期 （非必传，不传代表获取最新数据。不可单独指定）<br/>
-     """
-
-    logger.info(f"received parameters, token:{token}, area_filters:{area_filters}, time_filters: {date_filters}")
-
-    # 判断日期
-    date_filters = check_date_filter(date_filters)
-
-    try:
-        city_detail = InfectionCityNoNameModel()
-        city_data = Covid19.get_infection_city_data(
-            db=db, city=area_filters.name, stime=date_filters.start_date, etime=date_filters.end_date,
-            country=country_filters.name
-        )
-        if city_data:
-            city_detail.confirmed_add = city_data[0].confirmed_add if city_data[0].confirmed_add else 0
-            city_detail.deaths_add = city_data[0].deaths_add if city_data[0].deaths_add else 0
-            city_detail.recovered_add = city_data[0].recovered_add if city_data[0].recovered_add else 0
-
-    except Exception as e:
-        logger.error(f"{SYSTEM_ERROR}: {e}")
-        raise CustomException(SYSTEM_ERROR)
-    return InfectionCityInResponse(
-        data=city_detail
-    )
+# @router.get("/area", response_model=InfectionCityInResponse, name="infection:area")
+# async def infection_area(
+#         token: APIKey = Depends(get_api_key),
+#         db: Session = Depends(get_db),
+#         country_filters: AllowEmptyFilters = Depends(get_allow_empty_region_filters),
+#         area_filters: RegionFilters = Depends(get_area_filters),
+#         date_filters: DateFilters = Depends(get_date_filters),
+# ) -> InfectionCityInResponse:
+#     """
+#      查询指定城市在某段时间内的疫情数据信息 <br/>
+#      region: 国家 (非必传) <br/>
+#      area: 城市 (必传，默认值为 "Chongqing") <br/>
+#      start_date: 开始日期（非必传，不传代表获取最新数据。可单独指定，单独指定表示查询具体一天的数据信息） <br/>
+#      end_date: 结束日期 （非必传，不传代表获取最新数据。不可单独指定）<br/>
+#      """
+#
+#     logger.info(f"received parameters, token:{token}, area_filters:{area_filters}, time_filters: {date_filters}")
+#
+#     # 判断日期
+#     date_filters = check_date_filter(date_filters)
+#
+#     try:
+#         city_detail = InfectionCityNoNameModel()
+#         city_data = Covid19.get_infection_city_data(
+#             db=db, city=area_filters.name, stime=date_filters.start_date, etime=date_filters.end_date,
+#             country=country_filters.name
+#         )
+#         if city_data:
+#             city_detail.confirmed_add = city_data[0].confirmed_add if city_data[0].confirmed_add else 0
+#             city_detail.deaths_add = city_data[0].deaths_add if city_data[0].deaths_add else 0
+#             city_detail.recovered_add = city_data[0].recovered_add if city_data[0].recovered_add else 0
+#
+#     except Exception as e:
+#         logger.error(f"{SYSTEM_ERROR}: {e}")
+#         raise CustomException(SYSTEM_ERROR)
+#     return InfectionCityInResponse(
+#         data=city_detail
+#     )
 
 
 @router.get("/global", response_model=InfectionGlobalDataInResponse, name="infection:global")
@@ -212,7 +212,7 @@ async def infection_global_detail(
         global_data = Covid19.get_infection_global_data(db=db)
         last_update_date = Covid19.get_last_update_date(db=db)
         for _d in global_data:
-            global_detail.country.update({
+            global_detail.region.update({
                 _d.country_en: {
                     "confirmed_add": _d.confirmed_add,
                     "deaths_add": _d.deaths_add,
