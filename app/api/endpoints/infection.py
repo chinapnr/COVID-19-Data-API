@@ -71,6 +71,9 @@ async def infection_region(
                 data["region"][region_filters.name][str(_d.update_date)]["deaths"] += _d.deaths
                 data["region"][region_filters.name][str(_d.update_date)]["recovered"] += _d.recovered
     except Exception as e:
+        if isinstance(e, CustomException):
+            logger.error(f"custom exception: {e}")
+            raise e
         logger.error(f"{SYSTEM_ERROR}: {e}")
         raise CustomException(SYSTEM_ERROR)
     return InfectionRegionInResponse(
@@ -150,6 +153,9 @@ async def infection_region_detail(
                     })
 
     except Exception as e:
+        if isinstance(e, CustomException):
+            logger.error(f"custom exception: {e}")
+            raise e
         logger.error(f"{SYSTEM_ERROR}: {e}")
         raise CustomException(SYSTEM_ERROR)
 
