@@ -6,79 +6,86 @@ import pytest
 @pytest.mark.usefixtures('client', 'headers')
 class TestInfection:
 
-    def test_infection_country_tc01(self, client, headers):
+    def test_infection_region_tc01(self, client, headers):
         # db has data BETWEEN 2020-03-22 2020-03-24
-        country = 'China'
+        region = 'China'
         payload = {
-            'country': country,
-            'stime': '2020-03-22',
-            'etime': '2020-03-24',
-            'detail': 'false'
+            'region': region,
+            'start_date': '2020-03-22',
+            'end_date': '2020-03-24',
+            'include_hmt': 'false'
         }
-        response = client.get('/infection/country', params=payload, headers=headers)
+        response = client.get('/infection/region', params=payload, headers=headers)
         assert response.status_code == 200
         print("response: ", response.text)
         response_data = json.loads(response.text)['data']
-        assert response_data.get('name') == country
-        assert not response_data.get('area')
+        assert response_data
 
-    @pytest.mark.skipif('True==True')
-    def test_infection_country_tc02(self, client, headers):
+    def test_infection_region_tc02(self, client, headers):
         # db has no data BETWEEN 2020-03-25 2020-03-26
-        country = 'China'
+        region = 'China'
         payload = {
-            'country': country,
-            'stime': '2020-03-25',
-            'etime': '2020-03-26',
-            'detail': 'false'
+            'region': region,
+            'start_date': '2020-03-25',
+            'end_date': '2020-03-26',
+            'include_hmt': 'false'
         }
 
-        response = client.get('/infection/country', params=payload, headers=headers)
+        response = client.get('/infection/region', params=payload, headers=headers)
         assert response.status_code == 200
         print("response: ", response.text)
         response_data = json.loads(response.text)['data']
-        assert not response_data
+        assert response_data
 
-    def test_infection_country_tc03(self, client, headers):
+    def test_infection_region_tc03(self, client, headers):
         # db has data BETWEEN 2020-03-22 2020-03-24
         # look up detail
-        country = 'China'
+        region = 'China'
         payload = {
-            'country': country,
-            'stime': '2020-03-22',
-            'etime': '2020-03-24',
-            'detail': 'true'
+            'region': region,
+            'start_date': '2020-03-22',
+            'end_date': '2020-03-24',
+            'include_hmt': 'true'
         }
-        response = client.get('/infection/country', params=payload, headers=headers)
+        response = client.get('/infection/region', params=payload, headers=headers)
         assert response.status_code == 200
         print("response: ", response.text)
         response_data = json.loads(response.text)['data']
         assert response_data
-        assert response_data.get('name') == country
-        assert response_data.get('area')
 
-    def test_infection_city(self, client, headers):
-        country = 'China'
+    def test_infection_region_detail(self, client, headers):
+        region = 'China'
+        payload = {
+            'region': region,
+            'start_date': '2020-03-22',
+            'end_date': '2020-03-24',
+            'include_hmt': 'true'
+        }
+        response = client.get('/infection/region/detail', params=payload, headers=headers)
+        assert response.status_code == 200
+        print("response: ", response.text)
+        response_data = json.loads(response.text)['data']
+        assert response_data
+
+    @pytest.mark.skip
+    def test_infection_area(self, client, headers):
+        region = 'China'
         area = 'Chongqing'
         payload = {
-            'country': country,
+            'region': region,
             'area': area,
-            'stime': '2020-03-24',
-            'etime': '2020-03-22'
+            'start_date': '2020-03-22',
+            'end_date': '2020-03-24'
         }
 
-        response = client.get('/infection/city', params=payload, headers=headers)
+        response = client.get('/infection/area', params=payload, headers=headers)
         assert response.status_code == 200
         print("response: ", response.text)
         response_data = json.loads(response.text)['data']
         assert response_data
 
-    def test_infection_global_detail(self, client, headers):
-        payload = {
-            'stime': '2020-03-24',
-            'etime': '2020-03-22'
-        }
-        response = client.get('/infection/global', params=payload, headers=headers)
+    def test_infection_global(self, client, headers):
+        response = client.get('/infection/global', headers=headers)
         assert response.status_code == 200
         print("response: ", response.text)
         response_data = json.loads(response.text)['data']

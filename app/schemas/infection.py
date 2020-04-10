@@ -44,10 +44,11 @@ class InfectionGlobalInResponse(BaseResponse):
 
 
 class GlobalDataModel(BaseModel):
+    last_update_date = ""
     confirmed_add: int = 0
     deaths_add: int = 0
     recovered_add: int = 0
-    country: Mapping[str, Mapping[str, int]] = {}
+    region: Mapping[str, Mapping[str, int]] = {}
 
 
 class InfectionGlobalDataInResponse(BaseResponse):

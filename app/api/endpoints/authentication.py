@@ -3,7 +3,7 @@ from fishbase.fish_crypt import FishMD5
 from fishbase.fish_logger import logger
 from fastapi.security import APIKeyHeader
 from fishbase.fish_common import get_time_uuid
-from fastapi import Security, APIRouter, Depends, Body
+from fastapi import Security, APIRouter, Depends
 
 from app.db import get_db
 from app.models.user import CovidUser
@@ -32,6 +32,12 @@ async def authentication_register(
         register_filters: RegisterFilters,
         db: Session = Depends(get_db),
 ) -> AuthenticationRegisterInResponse:
+    """
+    获取接口调用凭证 <br/>
+    email： 获取凭证的邮箱地址
+    凭证会以邮件方式发往改邮箱
+    """
+
     logger.info(f"received parameters, register_filters:{register_filters}")
 
     bloom_filter = BloomFilterUtils()
@@ -49,7 +55,7 @@ async def authentication_register(
 
     # 发送 token 信息
     token = FishMD5.hmac_md5(register_filters.email, str(get_time_uuid()))
-    send_status = email.send_mail(EMAIL_CONTENT.format(_Token = token), register_filters.email)
+    send_status = email.send_mail(EMAIL_CONTENT.format(_Token=token), register_filters.email)
     if not send_status:
         raise CustomException(EMAIL_ERROR, msg_dict={"error": "failed to send"})
 

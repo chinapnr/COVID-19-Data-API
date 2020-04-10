@@ -22,6 +22,11 @@ async def population(
         db: Session = Depends(get_db),
         country_filters: RegionFilters = Depends(get_allow_empty_region_filters),
 ) -> PopulationInResponse:
+    """
+    查询人口数据信息 <br/>
+    region: 国家 (非必传，默认值查全部国家) <br/>
+    """
+
     logger.info(f"received parameters, token:{token}, country_filters: {country_filters}")
 
     try:
@@ -48,6 +53,10 @@ async def region_list(
         token: APIKey = Depends(get_api_key),
         db: Session = Depends(get_db)
 ) -> RegionListInResponse:
+    """
+    查询有疫情信息的国家列表 <br/>
+    """
+
     logger.info(f"received parameters, token:{token}")
 
     try:
@@ -68,11 +77,17 @@ async def area_list(
         region_filters: RegionFilters = Depends(get_region_filters),
         hmt_filters: Hmtfilters = Depends(get_hmt_filters)
 ) -> AreaListInResponse:
+    """
+    查询指定国家的疫情城市列表数据 <br/>
+    region: 国家 <br/>
+    include_hmt: 默认为 true，当 region 为 China 时返回包含港澳台疫情数据信息，false 为不返回
+    """
+
     logger.info(f"received parameters, token:{token}, region_filters:{region_filters}, hmt_filters: {hmt_filters}")
 
     try:
         area_data = Covid19.get_area_list(db=db, region=region_filters.name, hmt=hmt_filters.include_hmt)
-        data = [_d[0] for _d in area_data if _d[0]]
+        data = [_d[0] for _d in area_data if _d[0] and _d[0] != "Recovered"]
     except Exception as e:
         logger.error(f"{SYSTEM_ERROR}: {e}")
         raise CustomException(SYSTEM_ERROR)

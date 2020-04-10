@@ -65,9 +65,9 @@ def get_population_year_filters(
 def check_date_filter(date_filters: DateFilters):
     # 判断日期
     if not date_filters.start_date and not date_filters.end_date:
-        # 默认为当天
-        date_filters.start_date = datetime.date.today().strftime("%Y-%m-%d")
-        date_filters.end_date = datetime.date.today().strftime("%Y-%m-%d")
+        # 默认为最新数据
+        date_filters.start_date = None
+        date_filters.end_date = None
 
     elif date_filters.start_date and date_filters.end_date:
         # 自定义日期
