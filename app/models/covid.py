@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Date, and_, func, distinct
 from app.db.session import Session
 from app.models import Base
 from app.schemas.const import HMT
+from app.schemas.common import *
 
 
 class Covid19(Base):
@@ -33,6 +34,11 @@ class Covid19(Base):
                 # 不包含港澳台
                 filters = and_(Covid19.continents_en != "",
                                Covid19.province_en.notin_(HMT))
+            if start_date and not end_date:
+                max_update_date = db.query(func.max(Covid19.update_date).label("max_update_date")).all()
+                end_date = str(max_update_date[0][0])
+
+            check_date_filter(DateFilters(**{'start_date': start_date, 'end_date': end_date}))
 
             if start_date and end_date:
                 # 获取某段时间区间内的数据
@@ -83,6 +89,13 @@ class Covid19(Base):
                 # 不包含港澳台
                 filters = and_(Covid19.continents_en != "",
                                Covid19.province_en.notin_(HMT))
+
+            if start_date and not end_date:
+                max_update_date = db.query(func.max(Covid19.update_date).label("max_update_date")).all()
+                end_date = str(max_update_date[0][0])
+
+            check_date_filter(DateFilters(**{'start_date': start_date, 'end_date': end_date}))
+
             if start_date and end_date:
                 result = db.query(
                     Covid19.update_date,

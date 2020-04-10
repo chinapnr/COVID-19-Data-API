@@ -88,7 +88,7 @@ def check_date_filter(date_filters: DateFilters):
     elif date_filters.start_date and not date_filters.end_date:
         # 具体的一天(start_date 和 end_date 相同)
         date_filters.start_date = date_filters.start_date
-        date_filters.end_date = date_filters.start_date
+        date_filters.end_date = None
     else:
         raise CustomException(PARAM_ERROR, msg_dict={"error": "You can’t just enter the end_date"})
 
