@@ -62,6 +62,13 @@ def get_population_year_filters(
     )
 
 
+def _check_data_format(date_str):
+    try:
+        return datetime.datetime.strptime(date_str, "%Y-%m-%d")
+    except Exception as _:
+        raise CustomException(PARAM_ERROR, msg_dict={"error": "start_date or end_date is incorrect"})
+
+
 def check_date_filter(date_filters: DateFilters):
     # 判断日期
     if not date_filters.start_date and not date_filters.end_date:
@@ -73,12 +80,12 @@ def check_date_filter(date_filters: DateFilters):
         # 自定义日期
         # 判断是否超过 10 天
         try:
-            start_date = datetime.datetime.strptime(date_filters.start_date, "%Y-%m-%d")
-            end_date = datetime.datetime.strptime(date_filters.end_date, "%Y-%m-%d")
+            start_date = _check_data_format(date_filters.start_date)
+            end_date = _check_data_format(date_filters.end_date)
         except Exception as _:
             raise CustomException(PARAM_ERROR, msg_dict={"error": "start_date or end_date is incorrect"})
 
-        if (end_date - start_date).days > 10 or (end_date - start_date).days < 0:
+        if (end_date - start_date).days >= 10 or (end_date - start_date).days < 0:
             raise CustomException(
                 PARAM_ERROR,
                 msg_dict={
@@ -87,8 +94,18 @@ def check_date_filter(date_filters: DateFilters):
             )
     elif date_filters.start_date and not date_filters.end_date:
         # 具体的一天(start_date 和 end_date 相同)
-        date_filters.start_date = date_filters.start_date
-        date_filters.end_date = None
+        start_date = _check_data_format(date_filters.start_date)
+        # 判断是否超过今天
+        if (start_date - datetime.datetime.today()).days >= 1:
+            raise CustomException(
+                PARAM_ERROR,
+                msg_dict={
+                    "error": "start_date cannot be greater than today"
+                }
+            )
+
+        date_filters.start_date = start_date
+        date_filters.end_date = start_date
     else:
         raise CustomException(PARAM_ERROR, msg_dict={"error": "You can’t just enter the end_date"})
 
