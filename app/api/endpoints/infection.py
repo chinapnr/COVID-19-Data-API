@@ -26,9 +26,10 @@ async def infection_region(
     """
     查询指定国家在某段时间内的疫情数据信息 <br/>
     region: 国家 (必传，默认值为 China) <br/>
-    start_date: 开始日期（非必传，不传代表获取最新数据。可单独指定，单独指定表示查询具体一天的数据信息） <br/>
+    start_date: 开始日期（非必传，不传代表获取最新数据。可单独指定，单独指定表示查询这一天一直到最新一天的的数据信息） <br/>
     end_date: 结束日期 （非必传，不传代表获取最新数据。不可单独指定）<br/>
-    include_hmt: 默认为 true，当 region 为 China 时返回包含港澳台疫情数据信息，false 为不返回
+    include_hmt: 默认为 true，当 region 为 China 时返回包含港澳台疫情数据信息，false 为不返回<br/>
+    日期最长可以查询10天
     """
 
     logger.info(
@@ -88,9 +89,10 @@ async def infection_region_detail(
     """
     查询指定国家在某段时间内的疫情明细数据信息 <br/>
     region: 国家 (必传，默认值为 China) <br/>
-    start_date: 开始日期（非必传，不传代表获取最新数据。可单独指定，单独指定表示查询具体一天的数据信息） <br/>
+    start_date: 开始日期（非必传，不传代表获取最新数据。可单独指定，单独指定表示查询这一天一直到最新一天的的数据信息）） <br/>
     end_date: 结束日期 （非必传，不传代表获取最新数据。不可单独指定）<br/>
-    include_hmt: 默认为 true，当 region 为 China 时返回包含港澳台疫情数据信息，false 为不返回
+    include_hmt: 默认为 true，当 region 为 China 时返回包含港澳台疫情数据信息，false 为不返回<br/>
+    日期最长可以查询10天
     """
 
     logger.info(

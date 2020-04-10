@@ -53,6 +53,22 @@ class TestInfection:
         response_data = json.loads(response.text)['data']
         assert response_data
 
+    def test_infection_region_tc04(self, client, headers):
+        # db has data BETWEEN 2020-03-22 2020-03-24
+        # look up detail
+        region = 'China'
+        payload = {
+            'region': region,
+            'start_date': '2020-03-22',
+            # 'end_date': '2020-03-24',
+            'include_hmt': 'true'
+        }
+        response = client.get('/infection/region', params=payload, headers=headers)
+        assert response.status_code == 200
+        print("response: ", response.text)
+        response_data = json.loads(response.text)['data']
+        assert response_data
+
     def test_infection_region_detail(self, client, headers):
         region = 'China'
         payload = {
