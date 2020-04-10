@@ -1,5 +1,3 @@
-import json
-
 import pytest
 
 
@@ -8,8 +6,8 @@ class TestAuthentication:
 
     def test_authentication_register(self, client):
         payload = {
-            "email": "string"
+            "email": "rex_yan@126.com"
         }
 
-        response = client.get('/infection/region', data=json.loads(payload))
-        assert response.status_code == 200
+        response = client.post('/authentication/register', json=payload)
+        assert response.status_code == 400

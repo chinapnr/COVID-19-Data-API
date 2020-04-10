@@ -67,6 +67,7 @@ class TestInfection:
         response_data = json.loads(response.text)['data']
         assert response_data
 
+    @pytest.mark.skip
     def test_infection_area(self, client, headers):
         region = 'China'
         area = 'Chongqing'
