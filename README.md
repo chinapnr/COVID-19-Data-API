@@ -1,5 +1,5 @@
-[![Github Build Status](https://github.com/chinapnr/COVID-19-data/workflows/Python%20App/badge.svg?branch=master)](https://github.com/chinapnr/COVID-19-data/actions)
-[![codecov](https://codecov.io/gh/chinapnr/COVID-19-data/branch/master/graph/badge.svg)](https://codecov.io/gh/chinapnr/COVID-19-data)
+[![Github Build Status](https://github.com/chinapnr/COVID-19-data/workflows/Python%20App/badge.svg?branch=master)](https://github.com/chinapnr/COVID-19-Data-API/actions)
+[![codecov](https://codecov.io/gh/chinapnr/COVID-19-Data-API/branch/master/graph/badge.svg)](https://codecov.io/gh/chinapnr/COVID-19-Data-API)
 
 # COVID-19-Data-API
 
