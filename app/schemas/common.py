@@ -96,7 +96,7 @@ def check_date_filter(date_filters: DateFilters):
         # 具体的一天(start_date 和 end_date 相同)
         start_date = _check_data_format(date_filters.start_date)
         # 判断是否超过今天
-        if (start_date - datetime.datetime.today()).days >= 1:
+        if (start_date - datetime.datetime.today()).days >= 0:
             raise CustomException(
                 PARAM_ERROR,
                 msg_dict={
