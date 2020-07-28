@@ -38,7 +38,7 @@ class Covid19(Base):
                 max_update_date = db.query(func.max(Covid19.update_date).label("max_update_date")).all()
                 end_date = str(max_update_date[0][0])
 
-            check_date_filter(DateFilters(**{'start_date': start_date, 'end_date': end_date}))
+            # check_date_filter(DateFilters(**{'start_date': start_date, 'end_date': end_date}))
 
             if start_date and end_date:
                 # 获取某段时间区间内的数据
@@ -94,7 +94,7 @@ class Covid19(Base):
                 max_update_date = db.query(func.max(Covid19.update_date).label("max_update_date")).all()
                 end_date = str(max_update_date[0][0])
 
-            check_date_filter(DateFilters(**{'start_date': start_date, 'end_date': end_date}))
+            # check_date_filter(DateFilters(**{'start_date': start_date, 'end_date': end_date}))
 
             if start_date and end_date:
                 result = db.query(
